@@ -1,0 +1,88 @@
+#+title: Project Milestone 2
+#+author: Team Lithium
+
+* Info
+
+For simplicity of setup/build, we are using SQLite, since it works nicely ootb with no setup outside of Python script.
+
+** Files
+
+~main.py~
+
+~initialize.py~ is a modified version of milestone 1 with added changes:
+- a new function ~write_to_db()~, similar to ~write_to_csv~ except it outputs data to the given sqlite table instead.
+- it will only write to the database file, however, if it doesn't already exist. This prevents overwriting changes made by the rest of the program.
+
+~search.py~ contains all of the implementation of the search functionality is a separate module.
+
+...
+
+* Setup
+
+** Python Version
+
+Ensure you are using at minimum python version 3.10.
+
+#+begin_src bash
+python3 --version
+#+end_src
+
+** OPTIONAL: Create an use a python virtual environment.
+
+Optional, but recommended to ensure you are using the proper requirements and we do not mess up any system packages.
+
+This example uses [[https://docs.astral.sh/uv/getting-started/installation/][uv]], but any venv should work.
+
+#+begin_src bash
+uv venv && source .venv/bin/activate
+#+end_src
+
+** Install the project requirements:
+
+The ~requirements.txt~ file lists the project requirements needed to build and run our program.
+
+If using ~uv~:
+
+#+begin_src bash
+uv pip install -r requirements.txt
+#+end_src
+
+otherwise, try just ~pip~:
+
+#+begin_src bash
+pip install -r requirements.txt
+#+end_src
+
+** Create the Database
+
+#+begin_comment
+You can skip this step by passing the ~--init~ flag to ~main.py~.
+#+end_comment
+
+Before the first run, the database must be created. This is done by running the ~initialize.py~ file as mentioned above.
+
+Running this file will create a sqlite database file called ~library.db~ which contains all of the important data that was parsed (as in milestone 1).
+
+#+begin_src bash
+python3 initialize.py
+#+end_src
+
+* Running the Project
+
+#+begin_src bash
+python3 main.py
+#+end_src
+
+or, if you skipped the "Create the Database" step:
+
+#+begin_src bash
+python3 main.py --init
+#+end_src
+
+To run the initialization step AND DELETE THE CURRENT DB (eg. to start fresh), pass the ~--reinit~ command.
+
+#+begin_src bash
+python3 main.py --reinit
+#+end_src
+
+A simple cli menu is displayed for testing this non-gui portion of the project.
