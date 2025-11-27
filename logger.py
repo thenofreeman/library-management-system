@@ -3,6 +3,9 @@ class Logger:
     def __init__(self) -> None:
         self.clear()
 
+    def empty(self) -> bool:
+        return len(self._results) == 0
+
     def write(self, value: str = "") -> None:
         self._results.append(value)
 

@@ -2,6 +2,7 @@
 
 import sys
 
+from common import BookSearchResult, trunc
 from search import search
 from initialize import init_db, reinit_db
 from logger import logger
@@ -37,7 +38,7 @@ def main() -> None:
     else:
         pass # no arguments given
 
-    if logger.hasErrored():
+    if not logger.empty():
         print(logger.flush())
 
     while prompt_menu(): pass
@@ -61,9 +62,10 @@ def prompt_menu() -> bool:
                 if logger.hasErrored():
                     print(logger.flush())
                 else:
-                    print(results)
+                    if results:
+                        print_books(results)
             else:
-                print("Search cancelled - no input provided.")
+                print("Search cancelled. No input provided.")
         case "0":
             print("\nQuitting...")
             return False
@@ -72,13 +74,11 @@ def prompt_menu() -> bool:
 
     return True
 
-# def print_books(books):
-#     w = {'isbn': 14, 'title': 40, 'authors': 35, 'status': 6}
+def print_books(books: list[BookSearchResult]):
+    print(f"\n{'NO':<2} {'ISBN':<12} {'TITLE':<40} {'AUTHORS':<35} {'STATUS':<6}")
 
-#     print(f"{'NO':<3} {'ISBN':<{w['isbn']}} {'TITLE':<{w['title']}} {'AUTHORS':<{w['authors']}} {'STATUS':<{w['status']}}")
-
-#     for i, (isbn, title, authors, status) in enumerate(books, start=1):
-#         print(f"{i:02d} {trunc(isbn, w['isbn']):<{w['isbn']}} {trunc(title, w['title']):<{w['title']}} {trunc(authors, w['authors']):<{w['authors']}} {trunc(status, w['status']):<{w['status']}}")
+    for i, (isbn, title, authors, status) in enumerate(books, start=1):
+        print(f"{i:02d} {isbn:<12} {trunc(title, 40):<40} {trunc(authors, 35):<35} {'IN' if status else 'OUT':<6}")
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,5 @@
 import os
 import sqlite3
-from typing import Optional
 
 from logger import logger
 from common import AUTHORS_TABLE, BOOK_AUTHORS_TABLE, BOOK_LOANS_TABLE, DB_NAME, BOOK_TABLE, BookSearchResult
@@ -25,7 +24,7 @@ def search(query: str) -> list[BookSearchResult] | None:
     SELECT
         b.Isbn as Isbn,
         b.Title as Title,
-        a.Name as Author,
+        GROUP_CONCAT(a.Name, ', ') as Authors,
         CASE
             WHEN l.Isbn IS NULL THEN 1
             WHEN l.Date_in IS NOT NULL THEN 1
@@ -38,9 +37,10 @@ def search(query: str) -> list[BookSearchResult] | None:
     WHERE b.Isbn LIKE ? COLLATE NOCASE
        OR b.Title LIKE ? COLLATE NOCASE
        OR a.Name LIKE ? COLLATE NOCASE
+    GROUP BY b.Isbn, b.Title, l.Isbn, l.Date_in
     ;
     """
-    params = [f"%{query}" for _ in range(3)]
+    params = [f"%{query}%" for _ in range(3)]
 
     c.execute(sql, params)
     results = c.fetchall()
