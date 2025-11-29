@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import date
 
 from common import (
     BORROWER_TABLE,
@@ -12,24 +13,39 @@ from common import (
 )
 from logger import logger
 
-def get_checkouts(borrower_id: str) -> list:
+def get_checkouts(borrower_id: str | None = None) -> list:
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
 
-    sql = f"""
-    SELECT
-        b.Isbn,
-        b.Title,
-        l.Date_out,
-        l.Date_in,
-        l.Loan_id
-    FROM {BOOK_TABLE} b
-    JOIN {BOOK_LOANS_TABLE} l ON l.Isbn = b.Isbn
-    WHERE l.Card_id = ?
-      AND l.Date_in IS NULL
-    """
+    if borrower_id:
+        sql = f"""
+        SELECT
+            b.Isbn,
+            b.Title,
+            l.Date_out,
+            l.Date_in,
+            l.Loan_id
+        FROM {BOOK_TABLE} b
+        JOIN {BOOK_LOANS_TABLE} l ON l.Isbn = b.Isbn
+        WHERE l.Card_id = ?
+        AND l.Date_in IS NULL
+        """
 
-    c.execute(sql, [borrower_id])
+        c.execute(sql, [borrower_id])
+    else:
+        sql = f"""
+        SELECT
+            b.Isbn,
+            b.Title,
+            l.Date_out,
+            l.Date_in,
+            l.Loan_id,
+        FROM {BOOK_TABLE} b
+        JOIN {BOOK_LOANS_TABLE} l ON l.Isbn = b.Isbn
+        AND l.Date_in IS NULL
+        """
+
+        c.execute(sql, [borrower_id])
 
     return c.fetchall()
 
@@ -193,3 +209,20 @@ def get_borrower_id(ssn: str) -> int | None:
 
 def borrower_exists(ssn: str) -> bool:
     return get_borrower_id(ssn) is not None # as boolean
+
+def last_updated_fines() -> date | None:
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT value FROM metadata
+        WHERE key = ?
+    """, (
+        'last_update',
+    ))
+    row = cursor.fetchone()
+    last_update = date.fromisoformat(row[0]) if row else None
+
+    conn.close()
+
+    return last_update

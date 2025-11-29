@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from datetime import date
 
 import db
 from logger import logger
@@ -80,8 +81,33 @@ def create_borrower(name: str, ssn: str, address: str) -> bool:
 
     return db.create_borrower(name, ssn, address)
 
-#
-#
-# TODO: fines
-#
-#
+def update_fines() -> bool:
+
+    last_update = db.last_updated_fines()
+    today = date.today()
+
+    should_update = (last_update is None) or (last_update >= today)
+
+    if not should_update:
+        return True
+
+    books_out = db.get_checkouts()
+
+    fines = []
+
+    for book in books_out:
+
+        loan_id = book[4]
+
+        start_date = book[2]
+        end_date = book[3] if book[3] else today
+
+        fine_amt = (start_date - end_date) * 0.25
+
+        fines.append((loan_id, fine_amt))
+
+    success = db.update_fines(fines)
+
+    db.set_metadata_value('last_update', date.today().isoformat())
+
+    return success

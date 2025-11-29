@@ -5,7 +5,7 @@ import os
 
 from common import trunc, DB_NAME
 from db.query import get_borrower_id
-from operations import create_borrower, search, checkout, checkin, init_db, reinit_db
+from operations import create_borrower, search, checkout, checkin, init_db, reinit_db, update_fines
 from logger import logger
 
 import db
@@ -35,7 +35,9 @@ def main() -> None:
             f"Run init command as per README"
         ])
 
-    if logger.hasErrored():
+    success = update_fines()
+
+    if logger.hasErrored() or not success:
         print(logger.flush())
         sys.exit(1)
 
@@ -50,6 +52,7 @@ def prompt_menu() -> bool:
     print("2. Checkout Books")
     print("3. Checkin Books")
     print("4. Create Borrower")
+    print("5. Enter Loan Payment")
     print("0. Quit")
 
     choice = input("\nMake a selection: ").strip()
@@ -179,6 +182,13 @@ def prompt_menu() -> bool:
                 print(logger.flush())
             else:
                 print(f"\nBorrower successfully created with ID: {borrower_id}.")
+
+        case "5": # payment
+            # only for books that are returned
+            # fine amounts listed as the sum of all fines per borrower
+            # all or nothing payments
+            # filter out paid fines
+            pass
 
         case "0":
             print("\nQuitting...")

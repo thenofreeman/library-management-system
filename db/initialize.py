@@ -70,12 +70,19 @@ def create_database() -> None:
     create_fines_table = f"""
         CREATE TABLE {FINES_TABLE} (
             Loan_id TEXT NOT NULL,
-            Fine_amt TEXT NOT NULL,
+            Fine_amt INTEGER NOT NULL,
             Paid INTEGER NOT NULL,
 
             PRIMARY KEY (Loan_id),
 
             FOREIGN KEY(Loan_id) REFERENCES BOOK_LOANS(Loan_id)
+        );
+    """
+
+    create_metadata_table = f"""
+        CREATE TABLE IF NOT EXISTS metadata (
+            key TEXT PRIMARY KEY,
+            value TEXT
         );
     """
 
@@ -92,6 +99,7 @@ def create_database() -> None:
     c.execute(create_borrower_table)
     c.execute(create_book_loans_table)
     c.execute(create_fines_table)
+    c.execute(create_metadata_table)
 
     conn.close()
 

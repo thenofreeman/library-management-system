@@ -1,11 +1,12 @@
 import sqlite3
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 
 from common import (
     BORROWER_TABLE,
     DB_NAME,
     BOOK_LOANS_TABLE,
+    FINES_TABLE,
 )
 from logger import logger
 
@@ -84,6 +85,50 @@ def create_borrower(name: str, ssn: str, address: str) -> bool:
 
     try:
         c.execute(sql, [name, ssn, address])
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.error(e.__str__())
+
+        conn.rollback()
+        success = False
+
+    conn.close()
+
+    return success
+
+def set_metadata_value(key: str, value: str):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    c.execute("""
+    INSERT OR REPLACE INTO metadata (
+        key,
+        value
+    ) VALUES (
+        ?,
+        ?
+    )
+    """, [key, value])
+    conn.commit()
+
+    conn.close()
+
+def update_fines(fines: list[tuple]) -> bool:
+    success = True
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    sql = f"""
+        UPDATE {FINES_TABLE}
+        SET Fine_amt = ?
+        WHERE Loan_id = ?
+    """
+
+    (fines, loan_ids) = tuple(map(list, zip(*fines)))
+
+    try:
+        c.execute(sql, [fines, loan_ids])
         conn.commit()
     except sqlite3.Error as e:
         logger.error(e.__str__())
