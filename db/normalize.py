@@ -12,7 +12,7 @@ def read_borrowers():
             full_name = f'{fname} {lname}'
             address = f'{addr}, {city}, {state}'
 
-            new_borrower = [idn, ssn, full_name, address, phone]
+            new_borrower = [int(idn[2:]), ssn, full_name, address, phone]
             borrowers_data.append(new_borrower)
 
     return borrowers_data

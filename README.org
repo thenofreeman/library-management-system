@@ -7,6 +7,8 @@ For simplicity of setup/build, we are using SQLite, since it works nicely ootb w
 
 ** Files
 
+Here's a brief explanation of what each file does.
+
 ~main.py~
 - the entry point
 - mostly just menu logic
@@ -41,7 +43,7 @@ For simplicity of setup/build, we are using SQLite, since it works nicely ootb w
 
 Ensure you are using at minimum python version 3.12.
 
-This is the most widely-adopted recent python version. It has some nice features that make writing this code much more fun.
+This is the most widely-adopted of the recent python version. It has some nice features that make writing this code much better.
 
 #+begin_src bash
 python3 --version
@@ -80,3 +82,5 @@ python3 main.py --reinit
 #+end_src
 
 You could also just delete the file and run ~--init~ again, but this way is nicer.
+
+WARNING: this removes all progress from created borrowers, checkouts, fines, etc. and just starts fresh with the given data.

@@ -1,10 +1,17 @@
 import os
+from pathlib import Path
 
 import db
 from logger import logger
 from common import DB_NAME, BookSearchResult
 
 def init_db() -> None:
+    if Path(DB_NAME).is_file():
+        logger.error(f"Unable to initialize. DB file '{DB_NAME}' already exists.")
+        logger.error("Rename or delete the file and try again.")
+
+        return
+
     # TODO: err checking on this file
     borrowers = db.read_borrowers()
     # TODO: err checking on this file
@@ -29,37 +36,19 @@ def reinit_db() -> None:
 
     init_db()
 
-def search(query: str) -> list[BookSearchResult] | None:
-    if not os.path.isfile(DB_NAME):
-        logger.errorAll([
-            f"No database found for '{DB_NAME}'",
-            f"Run init command as per README"
-        ])
-
-        return
-
-    results = db.search_books(query)
-
-    if not results:
-        logger.error("No results from your query.")
-
-        return
-
-    return results
+def search(query: str) -> list[BookSearchResult]:
+    return db.search_books(query)
 
 def checkout(isbn: str, borrower_id: str) -> bool:
-    if not os.path.isfile(DB_NAME):
-        logger.errorAll([
-            f"No database found for '{DB_NAME}'",
-            f"Run init command as per README"
-        ])
-
-        return False
-
     checkouts = db.get_checkouts(borrower_id)
 
-    if len(checkouts) > 3:
+    if len(checkouts) >= 3:
         logger.error(f"Max checkouts is 3. Borrower has {len(checkouts)}")
+
+    exists = db.book_exists(isbn)
+
+    if exists:
+        logger.error(f"The requested book does not exist in the database.")
 
     checked_out = db.is_available(isbn)
 
@@ -76,9 +65,7 @@ def checkout(isbn: str, borrower_id: str) -> bool:
     if logger.hasErrored():
         return False
 
-    success = db.create_loan(isbn, borrower_id)
-
-    return success
+    return db.create_loan(isbn, borrower_id)
 
 def checkin(isbn: str, borrower_id: str) -> None:
     # provide a way of selecting up to 3 books to checkin

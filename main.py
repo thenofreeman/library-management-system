@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 
-from common import BookSearchResult, trunc
+from common import BookSearchResult, trunc, DB_NAME
 from operations import search, checkout, checkin, init_db, reinit_db
 from logger import logger
 
@@ -27,6 +28,16 @@ def main() -> None:
     else:
         pass # no arguments given
 
+    if not os.path.isfile(DB_NAME):
+        logger.errorAll([
+            f"No database found for '{DB_NAME}'",
+            f"Run init command as per README"
+        ])
+
+    if logger.hasErrored():
+        print(logger.flush())
+        sys.exit(1)
+
     if not logger.empty():
         print(logger.flush())
 
@@ -50,45 +61,60 @@ def prompt_menu() -> bool:
 
                 results = search(query)
 
-                if logger.hasErrored():
-                    print(logger.flush())
+                if results:
+                    print_books(results)
                 else:
-                    if results:
-                        print_books(results)
+                    print("No results from your query.")
             else:
                 print("Operation cancelled. You must provide a search query.")
+
         case "2":
             borrower_id = input("\nEnter a Borrower Id: ").strip()
 
-            if borrower_id:
+            while not borrower_id:
+                print("You must provide a borrower ID.")
+                borrower_id = input("\nEnter a Borrower Id: ").strip()
+
+            isbn = input("Enter an ISBN: ").strip()
+
+            while not isbn:
+                print("You must provide an ISBN.")
                 isbn = input("Enter an ISBN: ").strip()
 
-                if isbn:
-                    checkout(isbn, borrower_id)
+            success = checkout(isbn, borrower_id)
 
-                    if logger.hasErrored():
-                        print(logger.flush())
-                    else:
-                        print("Book checked-out successfully.")
-                else:
-                    print("Operation cancelled. You must provide an ISBN.")
+            if not success:
+                print(logger.flush())
             else:
-                print("Operation cancelled. You must provide a borrower ID.")
+                print("\nBook checked-out successfully.")
+
         case "3":
-            isbn = input("\nEnter an ISBN: ").strip()
-            borrower_id = input("Enter a Borrower Id: ").strip()
-            borrower_name = input("Enter a Borrower Name: ").strip()
+            print("To search for a book, provide a value for at least one of the 3 fields.")
+            print("Press enter to skip a field.")
+
+            isbn = input("\nEnter an ISBN (optional): ").strip()
+            borrower_id = input("Enter a Borrower Id (optional): ").strip()
+            borrower_name = input("Enter a Borrower Name (optional): ").strip()
+
+            while not (isbn or borrower_id or borrower_name):
+                print("\nYou MUST provide a value to at least one of the 3 fields.")
+
+                isbn = input("\nEnter an ISBN (optional): ").strip()
+                borrower_id = input("Enter a Borrower Id (optional): ").strip()
+                borrower_name = input("Enter a Borrower Name (optional): ").strip()
 
             checkouts = db.search_checkouts(isbn, borrower_id, borrower_name)
 
-            if logger.hasErrored():
+            if not checkouts:
                 print(logger.flush())
             else:
                 if checkouts:
                     print(checkouts)
+
         case "0":
             print("\nQuitting...")
             return False
+
         case _:
             print("Invalid selection. Please try again.")
 

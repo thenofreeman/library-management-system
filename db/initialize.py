@@ -1,5 +1,4 @@
 import sqlite3
-from pathlib import Path
 
 from common import (
     DB_NAME,
@@ -13,13 +12,6 @@ from common import (
 from logger import logger
 
 def create_database() -> None:
-    if Path(DB_NAME).is_file():
-        logger.write(f"Unable to initialize. DB file '{DB_NAME}' already exists.")
-        logger.write("Rename or delete the file and try again.")
-
-        logger.setError()
-        return
-
     create_books_table = f"""
         CREATE TABLE {BOOK_TABLE} (
             Isbn TEXT NOT NULL,
@@ -52,7 +44,7 @@ def create_database() -> None:
 
     create_borrower_table = f"""
         CREATE TABLE {BORROWER_TABLE} (
-            Card_id TEXT NOT NULL,
+            Card_id INTEGER AUTO INCREMENT,
             Ssn TEXT NOT NULL,
             Bname TEXT NOT NULL,
             Address TEXT NOT NULL,
@@ -102,6 +94,23 @@ def create_database() -> None:
     c.execute(create_borrower_table)
     c.execute(create_book_loans_table)
     c.execute(create_fines_table)
+
+    conn.close()
+
+    # conn = sqlite3.connect(DB_NAME)
+    # c = conn.cursor()
+
+    # c.execute(f"""
+    #     SELECT MAX(Card_id) FROM {BORROWER_TABLE};
+    # """)
+    # max_id = c.fetchone()[0]
+    # print(max_id)
+
+    # c.execute(f"""
+    #     UPDATE sqlite_sequence
+    #     SET seq = ?
+    #     WHERE name = ?;
+    # """, [max_id, BORROWER_TABLE])
 
     logger.write("Tables created.")
     logger.write()

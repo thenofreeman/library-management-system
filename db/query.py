@@ -32,6 +32,22 @@ def get_checkouts(borrower_id: str) -> list:
 
     return c.fetchall()
 
+def book_exists(isbn: str) -> bool:
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    sql = f"""
+    SELECT
+        Isbn
+    FROM {BOOK_TABLE}
+    WHERE Isbn = ?
+    """
+
+    c.execute(sql, [isbn])
+    result = c.fetchone()
+
+    return not result # as boolean
+
 def is_available(isbn: str) -> bool:
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -95,30 +111,29 @@ def search_checkouts(isbn: str, borrower_id: str, name: str) -> list[BorrowerSea
     params = []
 
     if isbn:
-        conditions.append("LOWER(l.Isbn) LIKE LOWER(?)")
+        conditions.append("l.Isbn LIKE ? COLLATE NOCASE")
         params.append(f"%{isbn}%")
 
     if borrower_id:
-        conditions.append("LOWER(br.Card_id) LIKE LOWER(?)")
+        conditions.append("br.Card_id LIKE ?")
         params.append(f"%{isbn}%")
 
     if name:
-        conditions.append("LOWER(br.Bname) LIKE LOWER(?)")
+        conditions.append("br.Bname LIKE ? COLLATE NOCASE")
         params.append(f"%{isbn}%")
 
     if conditions:
         sql += " AND (" + " OR ".join(conditions) + ")"
+
     sql += " ORDER BY l.Date_out DESC"
 
-    c.execute(sql, [isbn, borrower_id, name])
+    c.execute(sql, params)
     checkouts = c.fetchall()
 
-    if not checkouts:
-        logger.error(f"No matching borrowers.")
-
-        return
-
     conn.close()
+
+    if not checkouts:
+        logger.error(f"No matching results.")
 
     return checkouts
 
