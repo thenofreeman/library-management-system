@@ -44,13 +44,11 @@ def create_database() -> None:
 
     create_borrower_table = f"""
         CREATE TABLE {BORROWER_TABLE} (
-            Card_id INTEGER AUTO INCREMENT,
+            Card_id INTEGER PRIMARY KEY AUTOINCREMENT,
             Ssn TEXT NOT NULL,
             Bname TEXT NOT NULL,
             Address TEXT NOT NULL,
-            Phone TEXT,
-
-            PRIMARY KEY (Card_id)
+            Phone TEXT
         );
     """
 
@@ -97,25 +95,8 @@ def create_database() -> None:
 
     conn.close()
 
-    # conn = sqlite3.connect(DB_NAME)
-    # c = conn.cursor()
-
-    # c.execute(f"""
-    #     SELECT MAX(Card_id) FROM {BORROWER_TABLE};
-    # """)
-    # max_id = c.fetchone()[0]
-    # print(max_id)
-
-    # c.execute(f"""
-    #     UPDATE sqlite_sequence
-    #     SET seq = ?
-    #     WHERE name = ?;
-    # """, [max_id, BORROWER_TABLE])
-
     logger.write("Tables created.")
     logger.write()
-
-    conn.close()
 
     logger.write(f"Database successfully created at {DB_NAME}.")
 

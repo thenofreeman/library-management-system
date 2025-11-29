@@ -186,7 +186,8 @@ def get_borrower_id(ssn: str) -> int | None:
 
     conn.close()
 
-    print(result)
+    if result:
+        return result[0]
 
     return result
 

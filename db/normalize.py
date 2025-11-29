@@ -2,6 +2,7 @@ import csv
 
 def read_borrowers():
     borrowers_data = [['Card_id', 'Ssn', 'Bname', 'Address', 'Phone']]
+    borrowers_result = []
 
     with open('data/borrower.csv', 'r', encoding='utf-8') as file:
         rows = list(csv.reader(file))
@@ -13,9 +14,9 @@ def read_borrowers():
             address = f'{addr}, {city}, {state}'
 
             new_borrower = [int(idn[2:]), ssn, full_name, address, phone]
-            borrowers_data.append(new_borrower)
+            borrowers_result.append(new_borrower)
 
-    return borrowers_data
+    return sorted(borrowers_result, key=lambda x: x[0])
 
 def read_books():
     books_data = [['Isbn', 'Title']]
