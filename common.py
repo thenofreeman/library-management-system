@@ -14,4 +14,4 @@ def trunc(text, width):
 # isbn, title, authors, status
 type BookSearchResult = tuple[str, str, list[str], bool]
 # loan_id, isbn, title, borrower_id, borrower_name
-type BorrowerSearchResult = tuple[int, str, str, str, str]
+type BorrowerSearchResult = tuple[str, str, str, str, str]

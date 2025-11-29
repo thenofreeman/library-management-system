@@ -56,17 +56,21 @@ def prompt_menu() -> bool:
         case "1":
             query = input("\nSearch by Title, Author, or ISBN: ").strip()
 
-            if query:
-                print(f"Searching for: {query}")
+            while not query:
+                print("You must provide a search query.")
+                query = input("\nSearch by Title, Author, or ISBN: ").strip()
 
-                results = search(query)
+            print(f"Searching for: {query}")
 
-                if results:
-                    print_books(results)
-                else:
-                    print("No results from your query.")
+            results = search(query)
+
+            if not results:
+                print("No results from your query.")
             else:
-                print("Operation cancelled. You must provide a search query.")
+                print(f"\n{'NO':<2} {'ISBN':<12} {'TITLE':<40} {'AUTHORS':<35} {'STATUS':<6}")
+
+                for i, (isbn, title, authors, status) in enumerate(results, start=1):
+                    print(f"{i:02d} {isbn:<12} {trunc(title, 40):<40} {trunc(authors, 35):<35} {'IN' if status else 'OUT':<6}")
 
         case "2":
             borrower_id = input("\nEnter a Borrower Id: ").strip()
@@ -108,8 +112,32 @@ def prompt_menu() -> bool:
             if not checkouts:
                 print(logger.flush())
             else:
-                if checkouts:
-                    print(checkouts)
+                print("Matching checkouts:")
+                for i, (loan_id, isbn, title, borrower_id, borrower_name) in enumerate(checkouts, start=1):
+                    print(f"\n{i}: LOAN ID: {loan_id}")
+                    print(f"\tISBN: {isbn}")
+                    print(f"\tTITLE: {trunc(title, 60)}")
+                    print(f"\tBORROWER: {borrower_name} ({borrower_id})")
+
+                while True:
+                    print()
+                    print("Select with books to checkin (max 3).")
+                    print("Specify which numbers, separeted by spaces.")
+
+                    sel_str = input("Selections (0 to cancel): ").strip()
+
+                    try:
+                        selections = [int(x) for x in sel_str.split(' ')]
+                        break
+                    except ValueError:
+                        print("Not a valid selection.")
+
+                success = checkin(checkouts, selections)
+
+                if not success:
+                    print(logger.flush())
+                else:
+                    print("\nBooks checked-in successfully.")
 
         case "0":
             print("\nQuitting...")
@@ -119,12 +147,6 @@ def prompt_menu() -> bool:
             print("Invalid selection. Please try again.")
 
     return True
-
-def print_books(books: list[BookSearchResult]):
-    print(f"\n{'NO':<2} {'ISBN':<12} {'TITLE':<40} {'AUTHORS':<35} {'STATUS':<6}")
-
-    for i, (isbn, title, authors, status) in enumerate(books, start=1):
-        print(f"{i:02d} {isbn:<12} {trunc(title, 40):<40} {trunc(authors, 35):<35} {'IN' if status else 'OUT':<6}")
 
 if __name__ == '__main__':
     main()

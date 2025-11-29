@@ -39,3 +39,30 @@ def create_loan(isbn: str, borrower_id: str) -> bool:
     conn.close()
 
     return success
+
+def resolve_loan(loan_id: str) -> bool:
+    success = True
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    date_in = datetime.now().strftime('%Y-%m-%d')
+
+    sql = f"""
+        UPDATE {BOOK_LOANS_TABLE}
+        SET Date_in = ?
+        WHERE Loan_id = ?
+    """
+
+    try:
+        c.execute(sql, [date_in, loan_id])
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.error(e.__str__())
+
+        conn.rollback()
+        success = False
+
+    conn.close()
+
+    return success

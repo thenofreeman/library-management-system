@@ -3,7 +3,7 @@ from pathlib import Path
 
 import db
 from logger import logger
-from common import DB_NAME, BookSearchResult
+from common import DB_NAME, BookSearchResult, BorrowerSearchResult
 
 def init_db() -> None:
     if Path(DB_NAME).is_file():
@@ -67,9 +67,16 @@ def checkout(isbn: str, borrower_id: str) -> bool:
 
     return db.create_loan(isbn, borrower_id)
 
-def checkin(isbn: str, borrower_id: str) -> None:
-    # provide a way of selecting up to 3 books to checkin
-    pass
+def checkin(checkouts: list[BorrowerSearchResult], selections: list[int]) -> bool:
+    if 0 in selections:
+        logger.write("Cancelling operation.")
+        return False
+
+    all_success = True
+    for checkout in [checkouts[i-1] for i in selections]:
+        all_success = all_success and db.resolve_loan(checkout[0]) # checkout[0] is loan_id
+
+    return all_success
 
 def create_borrower(name: str, ssn: str, address: str) -> None:
     # all params required.. phone?
