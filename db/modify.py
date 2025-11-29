@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 
 from common import (
+    BORROWER_TABLE,
     DB_NAME,
     BOOK_LOANS_TABLE,
 )
@@ -56,6 +57,33 @@ def resolve_loan(loan_id: str) -> bool:
 
     try:
         c.execute(sql, [date_in, loan_id])
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.error(e.__str__())
+
+        conn.rollback()
+        success = False
+
+    conn.close()
+
+    return success
+
+def create_borrower(name: str, ssn: str, address: str) -> bool:
+    success = True
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    sql = f"""
+    INSERT INTO {BORROWER_TABLE} (
+        Bname,
+        Ssn,
+        Address
+    ) VALUES (?, ?, ?)
+    """
+
+    try:
+        c.execute(sql, [name, ssn, address])
         conn.commit()
     except sqlite3.Error as e:
         logger.error(e.__str__())

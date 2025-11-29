@@ -48,7 +48,7 @@ def create_database() -> None:
             Ssn TEXT NOT NULL,
             Bname TEXT NOT NULL,
             Address TEXT NOT NULL,
-            Phone TEXT NOT NULL,
+            Phone TEXT,
 
             PRIMARY KEY (Card_id)
         );

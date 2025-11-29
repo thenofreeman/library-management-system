@@ -3,8 +3,9 @@
 import sys
 import os
 
-from common import BookSearchResult, trunc, DB_NAME
-from operations import search, checkout, checkin, init_db, reinit_db
+from common import trunc, DB_NAME
+from db.query import get_borrower_id
+from operations import create_borrower, search, checkout, checkin, init_db, reinit_db
 from logger import logger
 
 import db
@@ -48,12 +49,13 @@ def prompt_menu() -> bool:
     print("1. Book Search")
     print("2. Checkout Books")
     print("3. Checkin Books")
+    print("4. Create Borrower")
     print("0. Quit")
 
     choice = input("\nMake a selection: ").strip()
 
     match choice:
-        case "1":
+        case "1": # book search
             query = input("\nSearch by Title, Author, or ISBN: ").strip()
 
             while not query:
@@ -72,7 +74,7 @@ def prompt_menu() -> bool:
                 for i, (isbn, title, authors, status) in enumerate(results, start=1):
                     print(f"{i:02d} {isbn:<12} {trunc(title, 40):<40} {trunc(authors, 35):<35} {'IN' if status else 'OUT':<6}")
 
-        case "2":
+        case "2": # check-out books
             borrower_id = input("\nEnter a Borrower Id: ").strip()
 
             while not borrower_id:
@@ -92,7 +94,7 @@ def prompt_menu() -> bool:
             else:
                 print("\nBook checked-out successfully.")
 
-        case "3":
+        case "3": # check-in books
             print("To search for a book, provide a value for at least one of the 3 fields.")
             print("Press enter to skip a field.")
 
@@ -128,16 +130,55 @@ def prompt_menu() -> bool:
 
                     try:
                         selections = [int(x) for x in sel_str.split(' ')]
+
                         break
                     except ValueError:
                         print("Not a valid selection.")
 
-                success = checkin(checkouts, selections)
-
-                if not success:
-                    print(logger.flush())
+                if 0 in selections:
+                    print("Cancelling operation.")
                 else:
-                    print("\nBooks checked-in successfully.")
+                    success = True
+
+                    for checked_out in [checkouts[i-1] for i in selections]:
+                        success = success and checkin(checked_out[0])
+
+                    if not success:
+                        print(logger.flush())
+                    else:
+                        print("\nBooks checked-in successfully.")
+
+        case "4": # create borrower
+            print()
+
+            name = ""
+            ssn = ""
+            addr = ""
+
+            while True:
+                print("We need the following information to create a new borrower:")
+                name = name or input("Borrower's Name: ").strip()
+                ssn = ssn or input("Borrower's SSN: ").strip()
+                addr = addr or input("Borrower's address: ").strip()
+
+                if name and ssn and addr:
+                    break
+                else:
+                    print("\nMissing information.")
+
+            print("\nCreating a new borrower for:")
+            print(f"Name: {name}")
+            print(f"SSN: {ssn}")
+            print(f"Address: {addr}")
+
+            success = create_borrower(name, ssn, addr)
+
+            borrower_id = get_borrower_id(ssn)
+
+            if not success:
+                print(logger.flush())
+            else:
+                print(f"\nBorrower successfully created with ID: {borrower_id}.")
 
         case "0":
             print("\nQuitting...")

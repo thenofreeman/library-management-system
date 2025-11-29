@@ -47,7 +47,7 @@ def checkout(isbn: str, borrower_id: str) -> bool:
 
     exists = db.book_exists(isbn)
 
-    if exists:
+    if not exists:
         logger.error(f"The requested book does not exist in the database.")
 
     checked_out = db.is_available(isbn)
@@ -67,22 +67,21 @@ def checkout(isbn: str, borrower_id: str) -> bool:
 
     return db.create_loan(isbn, borrower_id)
 
-def checkin(checkouts: list[BorrowerSearchResult], selections: list[int]) -> bool:
-    if 0 in selections:
-        logger.write("Cancelling operation.")
+def checkin(loan_id: str) -> bool:
+    return db.resolve_loan(loan_id)
+
+def create_borrower(name: str, ssn: str, address: str) -> bool:
+    exists = db.borrower_exists(ssn)
+
+    if exists:
+        logger.error("Cannot create borrower. A borrower with this SSN already exists.")
+
         return False
 
-    all_success = True
-    for checkout in [checkouts[i-1] for i in selections]:
-        all_success = all_success and db.resolve_loan(checkout[0]) # checkout[0] is loan_id
+    return db.create_borrower(name, ssn, address)
 
-    return all_success
-
-def create_borrower(name: str, ssn: str, address: str) -> None:
-    # all params required.. phone?
-    # generate new card id that is compatible with existing ids
-    # ensure only one borrower per ssn is created
-    pass
-
-# fines..
+#
+#
+# TODO: fines
+#
 #

@@ -1,6 +1,7 @@
 import sqlite3
 
 from common import (
+    BORROWER_TABLE,
     DB_NAME,
     BOOK_TABLE,
     BOOK_AUTHORS_TABLE,
@@ -44,9 +45,9 @@ def book_exists(isbn: str) -> bool:
     """
 
     c.execute(sql, [isbn])
-    result = c.fetchone()
+    result = c.fetchone()[0]
 
-    return not result # as boolean
+    return result # as boolean
 
 def is_available(isbn: str) -> bool:
     conn = sqlite3.connect(DB_NAME)
@@ -168,3 +169,26 @@ def search_books(query: str) -> list:
     conn.close()
 
     return results
+
+def get_borrower_id(ssn: str) -> int | None:
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    sql = f"""
+    SELECT
+        Card_id
+    FROM {BORROWER_TABLE}
+    WHERE Ssn = ?
+    """
+
+    c.execute(sql, [ssn])
+    result = c.fetchone()
+
+    conn.close()
+
+    print(result)
+
+    return result
+
+def borrower_exists(ssn: str) -> bool:
+    return get_borrower_id(ssn) is not None # as boolean
