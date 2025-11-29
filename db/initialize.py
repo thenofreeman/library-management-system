@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-from ..common import (
+from common import (
     DB_NAME,
     BOOK_TABLE,
     BOOK_AUTHORS_TABLE,

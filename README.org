@@ -15,6 +15,13 @@ For simplicity of setup/build, we are using SQLite, since it works nicely ootb w
 - all of the code that interfaces between the menu and the database manager.
 - the business logic
 
+~logger.py~
+- a little utility to clean up errors and return values
+- it is used as a global instance ONLY
+
+~common.py~
+- a global namespace for useful things that occur in many files
+
 ~db/initialize.py~
 - the python and sql to set up the database initially
 
