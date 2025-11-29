@@ -8,76 +8,63 @@ For simplicity of setup/build, we are using SQLite, since it works nicely ootb w
 ** Files
 
 ~main.py~
+- the entry point
+- mostly just menu logic
 
-~initialize.py~ is a modified version of milestone 1 with added changes:
-- a new function ~write_to_db()~, similar to ~write_to_csv~ except it outputs data to the given sqlite table instead.
-- it will only write to the database file, however, if it doesn't already exist. This prevents overwriting changes made by the rest of the program.
+~operations.py~
+- all of the code that interfaces between the menu and the database manager.
+- the business logic
 
-~search.py~ contains all of the implementation of the search functionality is a separate module.
+~db/initialize.py~
+- the python and sql to set up the database initially
 
-...
+~db/normalize.py~
+- a modified version of milestone 1
+- turns the bad csv files into something that our database can handle
+
+~db/query.py~
+- any python/sql that requires getting some data from the database
+
+~db/modify.py~
+- all the python/sql that creates or updates values in the database (apart from what is done in init/normalize)
 
 * Setup
 
 ** Python Version
 
-Ensure you are using at minimum python version 3.10.
+Ensure you are using at minimum python version 3.12.
+
+This is the most widely-adopted recent python version. It has some nice features that make writing this code much more fun.
 
 #+begin_src bash
 python3 --version
 #+end_src
 
-** OPTIONAL: Create an use a python virtual environment.
+** Dependencies
 
-Optional, but recommended to ensure you are using the proper requirements and we do not mess up any system packages.
-
-This example uses [[https://docs.astral.sh/uv/getting-started/installation/][uv]], but any venv should work.
-
-#+begin_src bash
-uv venv && source .venv/bin/activate
-#+end_src
-
-** Install the project requirements:
-
-The ~requirements.txt~ file lists the project requirements needed to build and run our program.
-
-If using ~uv~:
-
-#+begin_src bash
-uv pip install -r requirements.txt
-#+end_src
-
-otherwise, try just ~pip~:
-
-#+begin_src bash
-pip install -r requirements.txt
-#+end_src
-
-** Create the Database
-
-#+begin_comment
-You can skip this step by passing the ~--init~ flag to ~main.py~.
-#+end_comment
-
-Before the first run, the database must be created. This is done by running the ~initialize.py~ file as mentioned above.
-
-Running this file will create a sqlite database file called ~library.db~ which contains all of the important data that was parsed (as in milestone 1).
-
-#+begin_src bash
-python3 initialize.py
-#+end_src
+No additonal dependencies are needed. We are using SQLite as our database, which comes nicely with the standard library.
 
 * Running the Project
+
+** First Run
+
+On your first run, you'll have to initialize the database:
+
+#+begin_src bash
+python3 main.py --init
+#+end_src
+
+This creates a database file called ~library.db~, which we will query with sqlite.
+
+** Normal Operation
 
 #+begin_src bash
 python3 main.py
 #+end_src
 
-or, if you skipped the "Create the Database" step:
+A simple cli menu is displayed for testing this non-gui portion of the project.
 
-#+begin_src bash
-python3 main.py --init
-#+end_src
+** Resetting Progress
 
 To run the initialization step AND DELETE THE CURRENT DB (eg. to start fresh), pass the ~--reinit~ command.
 
@@ -85,4 +72,4 @@ To run the initialization step AND DELETE THE CURRENT DB (eg. to start fresh), p
 python3 main.py --reinit
 #+end_src
 
-A simple cli menu is displayed for testing this non-gui portion of the project.
+You could also just delete the file and run ~--init~ again, but this way is nicer.
