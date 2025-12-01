@@ -61,9 +61,12 @@ def book_exists(isbn: str) -> bool:
     """
 
     c.execute(sql, [isbn])
-    result = c.fetchone()[0]
+    result = c.fetchone()
 
-    return result # as boolean
+    if result:
+        return result[0] # as boolean
+
+    return False
 
 def is_available(isbn: str) -> bool:
     conn = sqlite3.connect(DB_NAME)
