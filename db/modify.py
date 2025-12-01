@@ -125,10 +125,38 @@ def update_fines(fines: list[tuple]) -> bool:
         WHERE Loan_id = ?
     """
 
+    if not fines:
+        return True
+
     (fines, loan_ids) = tuple(map(list, zip(*fines)))
 
     try:
         c.execute(sql, [fines, loan_ids])
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.error(e.__str__())
+
+        conn.rollback()
+        success = False
+
+    conn.close()
+
+    return success
+
+def pay_fines(loan_ids: list[str]) -> bool:
+    success = True
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    sql = f"""
+        UPDATE {FINES_TABLE}
+        SET Paid = 1
+        WHERE Loan_id = ?
+    """
+
+    try:
+        c.executemany(sql, [(loan_id,) for loan_id in loan_ids])
         conn.commit()
     except sqlite3.Error as e:
         logger.error(e.__str__())

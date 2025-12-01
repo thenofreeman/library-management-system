@@ -39,13 +39,13 @@ def get_checkouts(borrower_id: str | None = None) -> list:
             b.Title,
             l.Date_out,
             l.Date_in,
-            l.Loan_id,
+            l.Loan_id
         FROM {BOOK_TABLE} b
         JOIN {BOOK_LOANS_TABLE} l ON l.Isbn = b.Isbn
         AND l.Date_in IS NULL
         """
 
-        c.execute(sql, [borrower_id])
+        c.execute(sql, [])
 
     return c.fetchall()
 
@@ -229,3 +229,21 @@ def last_updated_fines() -> date | None:
     conn.close()
 
     return last_update
+
+def borrower_id_exists(borrower_id: str) -> bool:
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    sql = f"""
+    SELECT
+        Card_id
+    FROM {BORROWER_TABLE}
+    WHERE Card_id = ?
+    """
+
+    c.execute(sql, [borrower_id])
+    result = c.fetchone()
+
+    conn.close()
+
+    return result is not None

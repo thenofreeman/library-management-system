@@ -5,7 +5,7 @@ import os
 
 from common import trunc, DB_NAME
 from db.query import get_borrower_id
-from operations import create_borrower, search, checkout, checkin, init_db, reinit_db, update_fines
+from operations import create_borrower, get_fines, pay_fines, search, checkout, checkin, init_db, reinit_db, update_fines
 from logger import logger
 
 import db
@@ -184,11 +184,37 @@ def prompt_menu() -> bool:
                 print(f"\nBorrower successfully created with ID: {borrower_id}.")
 
         case "5": # payment
-            # only for books that are returned
-            # fine amounts listed as the sum of all fines per borrower
-            # all or nothing payments
-            # filter out paid fines
-            pass
+            while True:
+                borrower_id = input("Enter a Borrower Id: ").strip()
+
+                if borrower_id:
+                    break
+                else:
+                    print("\nYou must provide an Id.")
+
+            amt_owed = get_fines(borrower_id)
+
+            if amt_owed is None:
+                logger.flush()
+            elif amt_owed == 0:
+                print(f"\n Borrower owes nothing.")
+            else:
+                print(f"\n Borrower owes: {amt_owed}")
+
+                while True:
+                    try:
+                        amt_to_pay = int(float(input("Enter an amount to pay: ").strip()) * 100)
+
+                        break
+                    except ValueError:
+                        print("\nPlease provide a number.")
+
+                success = pay_fines(borrower_id, amt_to_pay)
+
+                if not success:
+                    print(logger.flush())
+                else:
+                    print(f"\nAll fines for {borrower_id} have been paid off.")
 
         case "0":
             print("\nQuitting...")

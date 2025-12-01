@@ -111,3 +111,32 @@ def update_fines() -> bool:
     db.set_metadata_value('last_update', date.today().isoformat())
 
     return success
+
+def get_fines(borrower_id: str) -> int | None:
+    if not db.borrower_id_exists(borrower_id):
+        logger.error(f"Borrower with id '{borrower_id}' does not exist.")
+
+        return None
+
+    fines = db.get_fines(borrower_id)
+    total_fines = sum(fine[1] for fine in fines)
+
+    return total_fines
+
+def pay_fines(borrower_id: str, amt: int) -> bool:
+    if not db.borrower_id_exists(borrower_id):
+        logger.error(f"Borrower with id '{borrower_id}' does not exist.")
+
+        return False
+
+    fines = db.get_fines(borrower_id)
+    total_fines = sum(fine[1] for fine in fines)
+
+    if amt < total_fines:
+        logger.error(f"Amount paid is less than total fines owed.")
+
+        return False
+
+    loan_ids = [fine[0] for fine in fines]
+
+    return db.pay_fines(loan_ids)

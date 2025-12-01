@@ -186,7 +186,7 @@ def init_borrowers(data: list[list[str]]) -> None:
         ?, ?, ?, ?, ?
     );"""
 
-    borrowers_data = [tuple(row) for row in data[1:]]
+    borrowers_data = [tuple(row) for row in data]
 
     try:
         c.executemany(sql, borrowers_data)
