@@ -1,0 +1,54 @@
+#+title: Project Milestone 2
+#+author: Team Lithium
+
+* Info
+
+For simplicity of setup/build, we are using SQLite, since it works nicely ootb with no setup outside of Python script.
+
+* Setup
+
+** Python Version
+
+Ensure you are using at minimum python version 3.12.
+
+This is the most widely-adopted of the recent python version. It has some nice features that make writing this code much better.
+
+#+begin_src bash
+python3 --version
+#+end_src
+
+** Dependencies
+
+No additonal dependencies are needed. We are using SQLite as our database, which comes nicely with the standard library.
+
+* Running the Project
+
+** First Run
+
+On your first run, you'll have to initialize the database:
+
+#+begin_src bash
+python3 main.py --init
+#+end_src
+
+This creates a database file called ~library.db~, which we will query with sqlite.
+
+** Normal Operation
+
+#+begin_src bash
+python3 main.py
+#+end_src
+
+A simple cli menu is displayed for testing this non-gui portion of the project.
+
+** Resetting Progress
+
+To run the initialization step AND DELETE THE CURRENT DB (eg. to start fresh), pass ~--init -f~ to force initialization.
+
+#+begin_src bash
+python3 main.py --init -f
+#+end_src
+
+You could also just delete the file and run ~--init~ again, but this way is nicer.
+
+WARNING: this removes all progress from created borrowers, checkouts, fines, etc. and just starts fresh with the given data.

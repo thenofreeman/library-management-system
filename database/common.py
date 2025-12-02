@@ -1,3 +1,4 @@
+from datetime import date
 
 # constants
 
@@ -14,8 +15,8 @@ METADATA_TABLE_NAME = 'metadata'
 type StringMatrix = list[list[str]]
 type CSVData = tuple[StringMatrix, StringMatrix, StringMatrix, StringMatrix]
 
-type Book = tuple[str, str] # isbn, title
+type Book = tuple[str, str, str, bool] # isbn, title, authors, status
 type Author = tuple[str, str] # id, name
 type Borrower = tuple[int, str, str, str, str] # borrower_id, ssn, name, addr, phone
-type Loan = tuple[int, str, int, str, str] # id, isbn, borrower_id, date_o, date_i
-type Fine = tuple[int, int, bool] # id, amt, paid
+type Loan = tuple[int, str, str, int, str, date, date] # id, isbn, title, borrower_id, name, date_o, date_i
+type Fine = tuple[int, int, str, bool, date, date] # id, amt, isbn, paid, date_o, date_i

@@ -94,13 +94,11 @@ def _create_database() -> bool:
 
     c.execute(f"""
         CREATE TABLE {BOOK_LOANS_TABLE_NAME} (
-            Loan_id INTEGER NOT NULL,
+            Loan_id INTEGER PRIMARY KEY AUTOINCREMENT,
             Isbn TEXT NOT NULL,
             Card_id INTEGER NOT NULL,
             Date_out TEXT NOT NULL,
             Date_in TEXT,
-
-            PRIMARY KEY (Loan_id),
 
             FOREIGN KEY(Isbn) REFERENCES BOOK(Isbn),
             FOREIGN KEY(Card_id) REFERENCES BORROWER(Card_id)
