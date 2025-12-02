@@ -329,7 +329,7 @@ def prompt_menu() -> bool:
             amt_owed = db.get_fines(borrower_id)
 
             if amt_owed is None:
-                print("Failure getting fines")
+                print("Borrower has no pending fines")
             elif amt_owed == 0:
                 print(f"\n Borrower owes nothing.")
             else:

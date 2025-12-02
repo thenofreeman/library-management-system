@@ -128,7 +128,12 @@ def book_available(isbn: str) -> bool:
       AND Date_in IS NULL
     """
 
-    return bool(get_one_or_none(sql, [isbn]))
+    result = get_one_or_none(sql, [isbn])
+
+    if result is None:
+        return True
+
+    return result[0] == 0
 
 def get_book(isbn: str) -> Optional[Book]:
     books = search_books(isbn)
