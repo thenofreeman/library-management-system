@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+import argparse
+import database as db
+
+from pprint import pprint
+
+from logger import Logger
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run the Library Management System.")
+    parser.add_argument('-i', '--init', action='store_true', help='Specify to initialize the DB on startup.')
+    parser.add_argument('-f', '--force', action='store_true', help='Force commands to execute (eg. force a re-init of the db).')
+    parser.add_argument('-l', '--library', help='Pass a specific filename to be used for the database.')
+    parser.add_argument('-v', '--verbose', help='Show logs.')
+    args = parser.parse_args()
+
+    db_name = "library.db"
+
+    if args.library:
+        db_name = args.library
+
+    db_exists = db.exists(db_name)
+
+    if args.init:
+        if db_exists:
+            if args.force:
+                print(f"Deleting the database at '{db_name}'.")
+                db.delete(db_name)
+            else:
+                print(f"A database already exists at '{db_name}'. Either:")
+                print(f"- Remove the init command line flag to use this database,")
+                print(f"- Delete/Rename the file at '{db_name}', or")
+                print(f"- Pass the force flag to override this error.")
+                exit(1)
+
+        print(f"Initializing the database.")
+        db_exists = db.init(db_name)
+
+        if db_exists:
+            print(f"Database created and initialized at '{db_name}'.")
+        else:
+            print(f"Failed to initialize the database at '{db_name}'.")
+            exit(1)
+
+    if not db_exists:
+        print("You must first initialize a database.")
+        print("  Hint: Use the '--init' command line flag.")
+        exit(1)
+
+    start_application()
+
+def start_application() -> None:
+    pprint(db.search("asdfasfasdf"))
+
+if __name__ == '__main__':
+   main()
