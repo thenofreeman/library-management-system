@@ -1,59 +1,8 @@
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Container, Horizontal
 from textual.widgets import Button, Static, Header
 
 class NavbarComponent(Static):
-    # CSS_PATH = "../styles/navbar-component.tcss"
-
-    DEFAULT_CSS = """
-    NavbarComponent {
-        width: 100%;
-        height: auto;
-        background: $primary-background;
-        layout: vertical;
-    }
-
-    NavbarComponent Header {
-        dock: top;
-    }
-
-    NavbarComponent > Horizontal {
-        width: 100%;
-        height: 3;
-    }
-
-    NavbarComponent .nav-left {
-        width: 1fr;
-        height: 100%;
-        align-horizontal: left;
-        align-vertical: middle;
-        padding: 0 1;
-    }
-
-    NavbarComponent .nav-center {
-        width: 2fr;
-        height: 100%;
-        align-horizontal: center;
-        align-vertical: middle;
-    }
-
-    NavbarComponent .nav-right {
-        width: 1fr;
-        height: 100%;
-        align-horizontal: right;
-        align-vertical: middle;
-        padding: 0 1;
-    }
-
-    NavbarComponent .nav-title {
-        text-style: bold;
-    }
-
-    NavbarComponent .nav-placeholder {
-        width: 0;
-        height: 0;
-    }
-    """
 
     def __init__(
         self,

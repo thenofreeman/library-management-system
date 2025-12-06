@@ -2,35 +2,15 @@ from datetime import datetime
 
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Header, Button
-from textual.containers import Container, Vertical, Grid
+from textual.widgets import Button
+from textual.containers import Container, Grid
 
 from ui.components.navbar import NavbarComponent
 from ui.modals import QuitModal, TimeTravelModal
 from ui.screens import SearchScreen
 
 class HomeScreen(Screen):
-    CSS = "DataTable {height: 1fr}"
     SUB_TITLE = "Home"
-
-    # CSS_PATH = "../styles/home-screen.tcss"
-    DEFAULT_CSS = """
-    HomeScreen { layout: vertical; }
-    HomeScreen .content { 
-        height: 1fr;
-        align: center middle;
-    }
-    HomeScreen .menu-grid {
-        grid-size: 2 2;
-        grid-gutter: 1 2;
-        width: 70;
-        height: 16;
-    }
-    HomeScreen .menu-btn {
-        width: 100%;
-        height: 100%;
-    }
-    """
 
     def __init__(self, current_date: datetime | None = None) -> None:
         super().__init__()

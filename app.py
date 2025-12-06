@@ -10,6 +10,13 @@ class LibraryApp(App):
         "home": HomeScreen,
         "search": SearchScreen
     }
+    
+    CSS_PATH = [
+        "ui/styles/home-screen.tcss",
+        "ui/styles/navbar-component.tcss",
+        "ui/styles/quit-modal.tcss",
+        "ui/styles/time-travel-modal.tcss"
+    ]
 
     BINDINGS = [
         Binding("q", "quit", "Quit"),

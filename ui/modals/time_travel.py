@@ -7,7 +7,6 @@ from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, Label
 
 class TimeTravelModal(ModalScreen[datetime]):
-    CSS_PATH = "../styles/time-travel-modal.tcss"
 
     def __init__(self, current_date: datetime) -> None:
         super().__init__()
@@ -26,8 +25,8 @@ class TimeTravelModal(ModalScreen[datetime]):
                 )
                 yield Button(">", id="date-next", classes="arrow-btn")
             with Horizontal(classes="button-row"):
-                yield Button("Confirm", id="confirm", variant="success")
                 yield Button("Cancel", id="cancel", variant="error")
+                yield Button("Confirm", id="confirm", variant="success")
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:

@@ -5,7 +5,6 @@ from textual.containers import Grid
 from textual.widgets import Button, Label
 
 class QuitModal(ModalScreen[bool]):
-    CSS_PATH = "../styles/quit-modal.tcss"
 
     def compose(self) -> ComposeResult:
         yield Grid(
