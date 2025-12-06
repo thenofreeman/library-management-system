@@ -1,4 +1,4 @@
-QuitScreen {
+QuitModal {
     align: center middle;
 }
 
@@ -20,6 +20,6 @@ QuitScreen {
     content-align: center middle;
 }
 
-Button {
+#dialog Button {
     width: 100%;
 }

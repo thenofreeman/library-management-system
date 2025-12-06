@@ -1,4 +1,3 @@
 
-from .SearchScreen import SearchScreen
-from .HomeScreen import HomeScreen
-from .QuitScreen import QuitScreen
+from .search import SearchScreen
+from .home import HomeScreen
