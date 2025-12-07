@@ -29,5 +29,5 @@ BookDetailModal .detail-line {
 }
 
 DataTable {
-    height: 1fr
+    height: 10;
 }

@@ -7,7 +7,11 @@ from database.names import (
 
 from database.dtypes import Loan
 
+import database as db
+
 from . import query
+
+from logger import Logger
 
 def search_loans(isbn: str | None = None,
                      borrower_id: str | None = None,
@@ -52,12 +56,45 @@ def search_loans(isbn: str | None = None,
     return query.get_all_or_none(sql, params)
 
 def get_loans_by_borrower_id(borrower_id: str, only_returned: bool = False) -> Optional[list[Loan]]:
-    return search_loans(borrower_id=borrower_id, only_returned=only_returned)
+    return db.search_loans(borrower_id=borrower_id, only_returned=only_returned)
 
 def get_loans_by_isbn(isbn: str, only_returned: bool = False) -> Optional[list[Loan]]:
-    return search_loans(isbn=isbn, only_returned=only_returned)
+    return db.search_loans(isbn=isbn, only_returned=only_returned)
+
+def checkout(isbn: str, borrower_id: str) -> bool:
+    return db.create_loan(isbn, borrower_id)
 
 def create_loan(isbn: str, borrower_id: str) -> bool:
+    borrower = db.get_borrower_by_id(borrower_id)
+
+    if not borrower:
+        Logger.error("Borrower doesn't exist.")
+        return False
+
+    checkouts = db.get_loans_by_borrower_id(borrower_id)
+
+    if checkouts and len(checkouts) >= 3:
+        Logger.error("Too many checkouts.")
+        return False
+
+    book = db.get_book_by_isbn(isbn)
+
+    if not book:
+        Logger.error("Book doesn't exist.")
+        return False
+
+    book_available = db.book_available_with_isbn(isbn)
+
+    if not book_available:
+        Logger.error("Book already checked out.")
+        return False
+
+    borrowers_fines = db.get_fines_by_borrower_id(borrower_id)
+
+    if borrowers_fines and len(borrowers_fines) > 0:
+        Logger.error("Borrower has pending fines.")
+        return False
+
     sql = f"""
     INSERT INTO {BOOK_LOANS_TABLE_NAME} (
         Isbn,
@@ -74,6 +111,9 @@ def create_loan(isbn: str, borrower_id: str) -> bool:
     params = [isbn, borrower_id, date_out, due_date]
 
     return query.try_execute_one(sql, params)
+
+def checkin(loan_id: int) -> bool:
+    return db.resolve_loan(loan_id)
 
 def resolve_loan(loan_id: int) -> bool:
     sql = f"""

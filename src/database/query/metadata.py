@@ -2,7 +2,7 @@ from typing import Optional
 
 from . import query
 
-def get_metadata_value(key: str) -> Optional[str]:
+def get_value(key: str) -> Optional[str]:
     sql = """
         SELECT value FROM metadata
         WHERE key = ?
@@ -15,7 +15,7 @@ def get_metadata_value(key: str) -> Optional[str]:
 
     return str(result)
 
-def set_metadata_value(key: str, value: str) -> bool:
+def set_value(key: str, value: str) -> bool:
     sql = """
     INSERT OR REPLACE INTO metadata (
         key,

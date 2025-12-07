@@ -1,36 +1,33 @@
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Vertical, Horizontal
-from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label, Static
-from textual.binding import Binding
+from ui.custom import BaseModal
 
-class CreateBorrowerModal(ModalScreen):
-    BINDINGS = [
-        Binding("escape", "dismiss", "Cancel"),
-    ]
+class CreateBorrowerModal(BaseModal):
 
     def compose(self) -> ComposeResult:
-        with Container(id="modal_container"):
-            yield Static("Enter Borrower Information", id="title")
+        with Container(id="modal-container"):
+            yield Static("Enter Borrower Information", id="modal-title")
 
-            with Vertical(classes="input_group"):
-                yield Label("Name:", classes="input_label")
-                yield Input(placeholder="Enter full name", id="name_input")
+            with Vertical(classes="form-content"):
+                with Vertical(classes="input-field"):
+                    yield Label("Name:")
+                    yield Input(placeholder="Enter full name", id="name_input")
 
-            with Vertical(classes="input_group"):
-                yield Label("SSN:", classes="input_label")
-                yield Input(placeholder="XXX-XX-XXXX", id="ssn_input")
+                with Vertical(classes="input-field"):
+                    yield Label("SSN:")
+                    yield Input(placeholder="XXX-XX-XXXX", id="ssn_input")
 
-            with Vertical(classes="input_group"):
-                yield Label("Address:", classes="input_label")
-                yield Input(placeholder="Enter address", id="address_input")
+                with Vertical(classes="input-field"):
+                    yield Label("Address:")
+                    yield Input(placeholder="Enter address", id="address_input")
 
-            with Vertical(classes="input_group"):
-                yield Label("Phone:", classes="input_label")
-                yield Input(placeholder="(XXX) XXX-XXXX", id="phone_input")
+                with Vertical(classes="input-field"):
+                    yield Label("Phone:")
+                    yield Input(placeholder="(XXX) XXX-XXXX", id="phone_input")
 
-            with Horizontal(id="button_container"):
+            with Horizontal(classes="form-buttons"):
                 yield Button("Submit", variant="primary", id="submit_btn")
                 yield Button("Cancel", variant="default", id="cancel_btn")
 

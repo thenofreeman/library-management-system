@@ -1,22 +1,3 @@
-TimeTravelModal {
-    align: center middle;
-}
-
-TimeTravelModal > Vertical {
-    width: 60;
-    height: 14;
-    border: thick $primary;
-    background: $surface;
-    padding: 1 2;
-}
-
-TimeTravelModal .title {
-    width: 100%;
-    text-align: center;
-    text-style: bold;
-    margin-bottom: 1;
-}
-
 TimeTravelModal .date-selector {
     width: 100%;
     height: 3;
@@ -33,15 +14,4 @@ TimeTravelModal .date-display {
 TimeTravelModal .arrow-btn {
     width: 5;
     min-width: 5;
-}
-
-TimeTravelModal .button-row {
-    width: 100%;
-    height: auto;
-    align: center middle;
-    margin-top: 1;
-}
-
-TimeTravelModal .button-row Button {
-    margin: 0 2;
 }

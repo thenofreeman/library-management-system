@@ -1,0 +1,25 @@
+.form-content {
+    height: auto;
+    width: 100%;
+}
+
+.input-field {
+    height: auto;
+    margin-bottom: 1;
+}
+.input-field > Label {
+    color: $text;
+    margin-bottom: 1;
+}
+.input-field Input {
+    width: 100%;
+}
+.form-buttons {
+    width: 100%;
+    height: 3;
+    margin-top: 1;
+}
+.form-buttons Button {
+    width: 1fr;
+    margin: 0 1;
+}

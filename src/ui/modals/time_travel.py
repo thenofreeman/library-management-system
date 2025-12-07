@@ -2,11 +2,12 @@ from datetime import datetime, timedelta
 
 from textual import on
 from textual.app import ComposeResult
-from textual.screen import ModalScreen
-from textual.containers import Horizontal, Vertical
-from textual.widgets import Button, Label
+from textual.containers import Horizontal, Vertical, Container
+from textual.widgets import Button, Label, Static
 
-class TimeTravelModal(ModalScreen[datetime]):
+from ui.custom import BaseModal
+
+class TimeTravelModal(BaseModal[datetime]):
 
     def __init__(self, current_date: datetime) -> None:
         super().__init__()
@@ -14,17 +15,20 @@ class TimeTravelModal(ModalScreen[datetime]):
         self.selected_date = self.active_date
 
     def compose(self) -> ComposeResult:
-        with Vertical():
-            yield Label("Time Travel", classes="title")
-            with Horizontal(classes="date-selector"):
-                yield Button("<", id="date-prev", classes="arrow-btn")
-                yield Label(
-                    self.active_date.strftime("%m-%d-%Y"),
-                    id="date-display",
-                    classes="date-display",
-                )
-                yield Button(">", id="date-next", classes="arrow-btn")
-            with Horizontal(classes="button-row"):
+        with Container(id="modal-container"):
+            yield Static("Time Travel", id="modal-title")
+
+            with Vertical(classes="form-content"):
+                with Horizontal(classes="date-selector"):
+                    yield Button("<", id="date-prev", classes="arrow-btn")
+                    yield Label(
+                        self.active_date.strftime("%m-%d-%Y"),
+                        id="date-display",
+                        classes="date-display",
+                    )
+                    yield Button(">", id="date-next", classes="arrow-btn")
+
+            with Horizontal(classes="form-buttons"):
                 yield Button("Confirm", id="confirm", variant="success")
                 yield Button("Cancel", id="cancel", variant="error")
 

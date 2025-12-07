@@ -9,7 +9,11 @@ from database.names import (
     BORROWERS_TABLE_NAME
 )
 
+import database as db
+
 from . import query
+
+from logger import Logger
 
 # TODO: NOT PROPER QUERY
 def search_borrowers(search_term: str) -> Optional[list[Borrower]]:
@@ -61,6 +65,12 @@ def _get_borrower(column: str, param: str) -> Optional[Borrower]:
     return query.get_one_or_none(sql, [param])
 
 def create_borrower(name: str, ssn: str, address: str) -> bool:
+    borrower = db.get_borrower_by_ssn(ssn)
+
+    if borrower:
+        Logger.error("Borrower already exists.")
+        return False
+
     sql = f"""
     INSERT INTO {BORROWERS_TABLE_NAME} (
         Bname,

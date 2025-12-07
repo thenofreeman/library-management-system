@@ -1,7 +1,6 @@
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, Vertical
-from textual.screen import ModalScreen
 from textual.validation import Length
 from textual.widgets import Label, Button, TabbedContent, TabPane, DataTable, Static, Input
 
@@ -9,7 +8,9 @@ from ui.components import Tag
 
 import database as db
 
-class BookDetailModal(ModalScreen):
+from ui.custom import BaseModal
+
+class BookDetailModal(BaseModal):
 
     def __init__(self, book_data: dict) -> None:
         super().__init__()
@@ -38,63 +39,63 @@ class BookDetailModal(ModalScreen):
         self.update_result_count()
 
     def compose(self) -> ComposeResult:
-        with Container():
-            with TabbedContent():
-                with TabPane("Info"):
-                    with Vertical():
-                        yield Label("Book Details", id="modal-title")
-                        yield Label(f"ISBN: {self.book_data['isbn']}", classes="detail-line")
-                        yield Label(f"Title: {self.book_data['title']}", classes="detail-line")
+        with Container(id="modal-container"):
+            yield Static("Book Details", id="modal-title")
 
-                        with Horizontal(classes="detail-line"):
-                            yield Label("Authors: ")
-                            for author in self.book_data['authors']:
-                                yield Tag(author.strip())
+            with Vertical(classes="form-content"):
+                with TabbedContent():
+                    with TabPane("Info"):
+                        with Vertical():
+                            yield Label(f"ISBN: {self.book_data['isbn']}", classes="detail-line")
+                            yield Label(f"Title: {self.book_data['title']}", classes="detail-line")
 
-                        yield Label(f"Status: {self.book_data['status']}", classes="detail-line")
-                        if self.borrower_id:
-                            yield Label(
-                                f"Borrower: {self.borrower_name} (ID: {self.borrower_id})",
-                                classes="detail-line"
-                            )
+                            with Horizontal(classes="detail-line"):
+                                yield Label("Authors: ")
+                                for author in self.book_data['authors']:
+                                    yield Tag(author.strip())
 
-                with TabPane("Manage"):
-                    with Vertical():
-                        yield Label("Manage Book", id="modal-title")
+                            yield Label(f"Status: {self.book_data['status']}", classes="detail-line")
+                            if self.borrower_id:
+                                yield Label(
+                                    f"Borrower: {self.borrower_name} (ID: {self.borrower_id})",
+                                    classes="detail-line"
+                                )
 
-                        if self.book_data['status'] == True:
-                            yield Input(
-                                placeholder="Enter a Borrower ID...",
-                                type="text",
-                                validators=[
-                                    Length(minimum=1)
-                                ]
-                            )
+                    with TabPane("Manage"):
+                        with Vertical():
+                            if self.book_data['status'] == True:
+                                yield Input(
+                                    placeholder="Enter a Borrower ID...",
+                                    type="text",
+                                    validators=[
+                                        Length(minimum=1)
+                                    ]
+                                )
 
-                            yield Button("Check-Out Book", id="checkout-btn", variant="primary")
+                                yield Button("Check-Out Book", id="checkout-btn", variant="primary")
 
-                        else:
-                            yield Label(f"Borrower ID: {self.borrower_id}", classes="detail-line")
-                            yield Label(f"Borrower Name: {self.borrower_name}", classes="detail-line")
+                            else:
+                                yield Label(f"Borrower ID: {self.borrower_id}", classes="detail-line")
+                                yield Label(f"Borrower Name: {self.borrower_name}", classes="detail-line")
 
-                            loans = db.get_loans_by_borrower_id(self.borrower_id)
+                                loans = db.get_loans_by_borrower_id(self.borrower_id)
 
-                            if loans:
-                                (loan_id, _, _, _, date_out, due_date, _) = loans[0]
+                                if loans:
+                                    (loan_id, _, _, _, date_out, due_date, _) = loans[0]
 
-                                yield Label(f"Loan ID: {loan_id}", classes="detail-line")
-                                yield Label(f"Loaned On: {date_out}", classes="detail-line")
-                                yield Label(f"Due: {due_date}", classes="detail-line")
+                                    yield Label(f"Loan ID: {loan_id}", classes="detail-line")
+                                    yield Label(f"Loaned On: {date_out}", classes="detail-line")
+                                    yield Label(f"Due: {due_date}", classes="detail-line")
 
-                            yield Button("Check-In Book", id="checkin-btn", variant="primary")
+                                yield Button("Check-In Book", id="checkin-btn", variant="primary")
 
-                with TabPane("Checkout History"):
-                    with Vertical():
-                        yield Label("Checkout History", id="modal-title")
-                        yield DataTable()
-                        yield Static("", id="result-count")
+                    with TabPane("Checkout History"):
+                        with Vertical():
+                            yield DataTable()
+                            yield Static("", id="result-count")
 
-            yield Button("Close", id="close-button", variant="primary")
+            with Horizontal(classes="form-buttons"):
+                yield Button("Close", id="close-button", variant="primary")
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:

@@ -19,6 +19,6 @@ BookSearchScreen #result-count {
     text-align: center;
 }
 
-BookSearchScreen DataTable {
+BookSearchScreen > .content > DataTable {
     height: 1fr
 }
