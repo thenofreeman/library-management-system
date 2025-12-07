@@ -1,9 +1,9 @@
-from database.query import book
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Label, Button, TabbedContent, TabPane, DataTable, Static
+from textual.validation import Length
+from textual.widgets import Label, Button, TabbedContent, TabPane, DataTable, Static, Input
 
 from ui.components import Tag
 
@@ -24,7 +24,7 @@ class BookDetailModal(ModalScreen):
     def on_mount(self) -> None:
         table = self.query_one(DataTable)
 
-        table.add_column("ID", width=12)
+        table.add_column("Loan ID", width=6)
         table.add_column("Borrower ID", width=12)
         table.add_column("Date Out", width=12)
         table.add_column("Date In", width=12)
@@ -58,6 +58,36 @@ class BookDetailModal(ModalScreen):
                                 classes="detail-line"
                             )
 
+                with TabPane("Manage"):
+                    with Vertical():
+                        yield Label("Manage Book", id="modal-title")
+
+                        if self.book_data['status'] == True:
+                            yield Input(
+                                placeholder="Enter a Borrower ID...",
+                                type="text",
+                                validators=[
+                                    Length(minimum=1)
+                                ]
+                            )
+
+                            yield Button("Check-Out Book", id="checkout-btn", variant="primary")
+
+                        else:
+                            yield Label(f"Borrower ID: {self.borrower_id}", classes="detail-line")
+                            yield Label(f"Borrower Name: {self.borrower_name}", classes="detail-line")
+
+                            loans = db.get_loans_by_borrower_id(self.borrower_id)
+
+                            if loans:
+                                (loan_id, _, _, _, date_out, due_date, _) = loans[0]
+
+                                yield Label(f"Loan ID: {loan_id}", classes="detail-line")
+                                yield Label(f"Loaned On: {date_out}", classes="detail-line")
+                                yield Label(f"Due: {due_date}", classes="detail-line")
+
+                            yield Button("Check-In Book", id="checkin-btn", variant="primary")
+
                 with TabPane("Checkout History"):
                     with Vertical():
                         yield Label("Checkout History", id="modal-title")
@@ -68,7 +98,22 @@ class BookDetailModal(ModalScreen):
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
-        self.dismiss()
+        if event.button.id == 'close-button':
+            self.dismiss()
+
+        elif event.button.id == 'checkout-btn':
+            input = self.query_one(Input)
+
+            # TODO: shouldn't allow creating loan for the same book
+            success = db.create_loan(self.book_data['isbn'], input.value)
+
+            if success:
+                self.dismiss()
+            else:
+                pass # TODO show invalid or failed
+
+        elif event.button.id == 'checkin-btn':
+            pass # TODO: show confirm modal
 
     @on(Tag.Clicked)
     def handle_tag_clicked(self, event: Tag.Clicked) -> None:
