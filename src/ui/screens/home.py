@@ -7,7 +7,7 @@ from textual.widgets import Button
 from textual.containers import Container, Grid
 
 from ui.components.navbar import NavbarComponent
-from ui.modals import QuitModal, TimeTravelModal
+from ui.modals import QuitModal, TimeTravelModal, CreateBorrowerModal
 from ui.screens import BookSearchScreen, BorrowerSearchScreen
 
 class HomeScreen(Screen):
@@ -51,7 +51,7 @@ class HomeScreen(Screen):
         elif event.button.id == "search-borrowers":
             self.app.push_screen(BorrowerSearchScreen())
         elif event.button.id == "create-borrower":
-            self.app.push_screen(BookSearchScreen())
+            self.app.push_screen(CreateBorrowerModal())
         elif event.button.id == "settings":
             self.app.push_screen(BookSearchScreen())
 

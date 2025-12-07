@@ -8,6 +8,8 @@ class LibraryApp(App):
     SUB_TITLE = ""
 
     CSS_PATH = [
+        "ui/styles/modal.tcss"
+
         "ui/styles/home-screen.tcss",
         "ui/styles/book-search-screen.tcss",
         "ui/styles/borrower-search-screen.tcss",
@@ -16,6 +18,7 @@ class LibraryApp(App):
         "ui/styles/time-travel-modal.tcss",
         "ui/styles/book-detail-modal.tcss",
         "ui/styles/filter-modal.tcss",
+        "ui/styles/create-borrower-modal.tcss",
 
         "ui/styles/navbar-component.tcss",
         "ui/styles/tag-component.tcss",
