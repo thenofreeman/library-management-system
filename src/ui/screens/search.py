@@ -68,21 +68,21 @@ class SearchScreen(Screen):
             )
 
     @on(Input.Submitted)
-    def handle_search(self, event: Input.Submitted) -> None:
+    def handle_submit(self, event: Input.Submitted) -> None:
+        if event.validation_result.is_valid:
+            self.handle_search(event.value)
+
+    def handle_search(self, value: str) -> None:
         table = self.query_one(DataTable)
         table.clear()
 
-        if event.validation_result.is_valid:
-            results = search(event.value)
+        results = search(value)
 
-            if not results:
-                return
+        if not results:
+            return
 
-            for (isbn, title, authors, status) in results:
-                table.add_row(isbn, title, authors, status)
-
-        else:
-            pass
+        for (isbn, title, authors, status) in results:
+            table.add_row(isbn, title, authors, status)
 
         self.update_result_count()
 
@@ -111,11 +111,18 @@ class SearchScreen(Screen):
             "id": id,
             "isbn": isbn,
             "title": title,
-            "authors": authors.strip().split('|'),
+            "authors": authors.strip().split(','),
             "status": status,
         }
 
-        self.app.push_screen(BookDetailModal(book_data))
+        self.app.push_screen(BookDetailModal(book_data), self.handle_author_selected)
+
+    def handle_author_selected(self, author_name: str | None) -> None:
+        if author_name:
+            input = self.query_one(Input)
+            input.value = author_name
+
+            self.handle_search(input.value)
 
     def update_result_count(self) -> None:
         table = self.query_one(DataTable)

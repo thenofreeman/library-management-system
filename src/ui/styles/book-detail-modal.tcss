@@ -2,24 +2,24 @@ BookDetailModal {
     align: center middle;
 }
 
-BookDetailModal #modal-container {
-    grid-size: 2;
-    grid-gutter: 1 2;
-    grid-rows: 1fr 3;
-    padding: 0 1;
+BookDetailModal > Vertical {
     width: 60;
-    height: 11;
-    border: thick $background 80%;
+    height: auto;
+    border: thick $primary;
     background: $surface;
+    padding: 1 2;
 }
 
-#modal-title {
-    column-span: 2;
-    height: 1fr;
+BookDetailModal #modal-title {
     width: 1fr;
     content-align: center middle;
 }
 
-BookDetailModal #modal-container Button {
+BookDetailModal > Vertical > Button {
     width: 100%;
+}
+
+BookDetailModal .detail-line {
+    margin: 1 0;
+    height: auto;
 }

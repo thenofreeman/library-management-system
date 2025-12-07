@@ -21,6 +21,7 @@ class LibraryApp(App):
         "ui/styles/filter-modal.tcss",
 
         "ui/styles/navbar-component.tcss",
+        "ui/styles/tag-component.tcss",
     ]
 
     BINDINGS = [
