@@ -13,28 +13,12 @@ class SearchScreen(Screen):
     CSS = "DataTable {height: 1fr}"
     SUB_TITLE = "Search"
 
-    DEFAULT_CSS = """
-    SearchScreen {
-        layout: vertical;
-    }
+    def __init__(self):
+        super().__init__()
 
-    SearchScreen .content {
-        width: 100%;
-        height: 1fr;
-        align: center middle;
-        padding: 2;
-    }
-
-    SearchScreen #result-count {
-        dock: bottom;
-        height: 1;
-        width: 100%;
-        background: $panel;
-        color: $text;
-        padding: 0 2;
-        text-align: center;
-    }
-    """
+        self.filters = {
+            'availability': 'All',
+        }
 
     def compose(self) -> ComposeResult:
         yield NavbarComponent(
@@ -76,9 +60,10 @@ class SearchScreen(Screen):
     def handle_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "back-btn":
             self.app.pop_screen()
+
         elif event.button.id == "filter-btn":
             self.app.push_screen(
-                FilterModal(),
+                FilterModal(self.filters),
                 self.handle_filter,
             )
 
@@ -101,10 +86,10 @@ class SearchScreen(Screen):
 
         self.update_result_count()
 
-    def handle_filter(self, should_quit: bool) -> None:
-        pass
+    def handle_filter(self, filters: dict) -> None:
+        self.filters = filters
 
-        self.update_row_count()
+        self.update_result_count()
 
     @on(DataTable.HeaderSelected)
     def handle_header_selected(self, event: DataTable.HeaderSelected) -> None:
