@@ -3,7 +3,6 @@ from typing import Optional
 
 import database as db
 from database.common import Book
-from database.query import book_available, get_borrower_by_id
 from logger import Logger
 
 def search(query: str) -> Optional[list[Book]]:
