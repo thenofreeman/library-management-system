@@ -1,15 +1,15 @@
-SearchScreen {
+BorrowerSearchScreen {
     layout: vertical;
 }
 
-SearchScreen .content {
+BorrowerSearchScreen .content {
     width: 100%;
     height: 1fr;
     align: center middle;
     padding: 2;
 }
 
-SearchScreen #result-count {
+BorrowerSearchScreen #result-count {
     dock: bottom;
     height: 1;
     width: 100%;
@@ -19,6 +19,6 @@ SearchScreen #result-count {
     text-align: center;
 }
 
-DataTable {
+BorrowerSearchScreen DataTable {
     height: 1fr
 }

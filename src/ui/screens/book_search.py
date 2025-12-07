@@ -50,6 +50,7 @@ class BookSearchScreen(Screen):
         table.add_column("Title", width=50)
         table.add_column("Authors", width=25)
         table.add_column("Status", width=8)
+        table.add_column("Borrower ID", width=12)
 
         table.cursor_type = "row"
         table.zebra_stripes = True
@@ -81,8 +82,8 @@ class BookSearchScreen(Screen):
         if not results:
             return
 
-        for (isbn, title, authors, status) in results:
-            table.add_row(isbn, title, authors, status)
+        for (isbn, title, authors, status, borrower_id) in results:
+            table.add_row(isbn, title, authors, status, borrower_id)
 
         self.update_result_count()
 
@@ -105,7 +106,7 @@ class BookSearchScreen(Screen):
         table = event.data_table
         row_key = event.row_key
 
-        [isbn, title, authors, status] = table.get_row(row_key)
+        [isbn, title, authors, status, borrower_id] = table.get_row(row_key)
 
         book_data = {
             "id": id,
@@ -113,6 +114,7 @@ class BookSearchScreen(Screen):
             "title": title,
             "authors": authors.strip().split(','),
             "status": status,
+            "borrower_id": borrower_id,
         }
 
         self.app.push_screen(BookDetailModal(book_data), self.handle_author_selected)

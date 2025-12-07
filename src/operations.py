@@ -2,7 +2,8 @@ from datetime import date
 from typing import Optional
 
 import database as db
-from database.common import Book
+
+from database.dtypes import Book
 from logger import Logger
 
 def search(query: str) -> Optional[list[Book]]:
@@ -15,25 +16,25 @@ def checkout(isbn: str, borrower_id: str) -> bool:
         Logger.error("Borrower doesn't exist.")
         return False
 
-    checkouts = db.get_loans(borrower_id)
+    checkouts = db.get_loans_by_borrower_id(borrower_id)
 
     if checkouts and len(checkouts) >= 3:
         Logger.error("Too many checkouts.")
         return False
 
-    book = db.get_book(isbn)
+    book = db.get_book_by_isbn(isbn)
 
     if not book:
         Logger.error("Book doesn't exist.")
         return False
 
-    book_available = db.book_available(isbn)
+    book_available = db.book_available_with_isbn(isbn)
 
     if not book_available:
         Logger.error("Book already checked out.")
         return False
 
-    borrowers_fines = db.get_fines(borrower_id)
+    borrowers_fines = db.get_fines_by_borrower_id(borrower_id)
 
     if borrowers_fines and len(borrowers_fines) > 0:
         Logger.error("Borrower has pending fines.")
@@ -60,7 +61,7 @@ def pay_fines(borrower_id: str, amt: int) -> bool:
         Logger.error("Borrower doesn't exist.")
         return False
 
-    fines = db.get_fines(borrower_id)
+    fines = db.get_fines_by_borrower_id(borrower_id)
 
     if not fines:
         # no fines to pay
@@ -85,11 +86,11 @@ def update_fines() -> bool:
     if not should_update:
         return True
 
-    books_out = db.get_fines(unpaid=True)
+    books_out = db.get_all_fines(unpaid=True)
 
     if not books_out:
         # no books out, already up to date
-        db.set_metadata_value('last_update', date.today().isoformat())
+        db.set_fines_updated(date.today().isoformat())
         return True
 
     fines_to_update = []
@@ -106,7 +107,7 @@ def update_fines() -> bool:
     success = db.update_fines(fines_to_update)
 
     if success:
-        db.set_metadata_value('last_update', date.today().isoformat())
+        db.set_fines_updated(date.today().isoformat())
         return True
 
     return False

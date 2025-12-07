@@ -9,7 +9,8 @@ class LibraryApp(App):
 
     CSS_PATH = [
         "ui/styles/home-screen.tcss",
-        "ui/styles/search-screen.tcss",
+        "ui/styles/book-search-screen.tcss",
+        "ui/styles/borrower-search-screen.tcss",
 
         "ui/styles/quit-modal.tcss",
         "ui/styles/time-travel-modal.tcss",
