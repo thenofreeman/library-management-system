@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from textual import on
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Button
@@ -36,7 +37,8 @@ class HomeScreen(Screen):
         # Footer (empty for now)
         yield Container(classes="footer")
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    @on(Button.Pressed)
+    def handle_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "quit-btn":
             self.app.push_screen(QuitModal(), self.handle_quit)
         elif event.button.id == "time-travel-btn":

@@ -13,9 +13,14 @@ class LibraryApp(App):
     
     CSS_PATH = [
         "ui/styles/home-screen.tcss",
-        "ui/styles/navbar-component.tcss",
+        "ui/styles/search-screen.tcss",
+
         "ui/styles/quit-modal.tcss",
-        "ui/styles/time-travel-modal.tcss"
+        "ui/styles/time-travel-modal.tcss",
+        "ui/styles/book-detail-modal.tcss",
+        "ui/styles/filter-modal.tcss",
+
+        "ui/styles/navbar-component.tcss",
     ]
 
     BINDINGS = [

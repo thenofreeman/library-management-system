@@ -2,11 +2,12 @@ from textual import on
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.validation import Length
-from textual.widgets import DataTable, Input, Button
+from textual.widgets import DataTable, Input, Button, Static
 from textual.containers import Container
 
 from operations import search
 from ui.components import NavbarComponent
+from ui.modals import BookDetailModal, FilterModal
 
 class SearchScreen(Screen):
     CSS = "DataTable {height: 1fr}"
@@ -22,6 +23,16 @@ class SearchScreen(Screen):
         height: 1fr;
         align: center middle;
         padding: 2;
+    }
+
+    SearchScreen #result-count {
+        dock: bottom;
+        height: 1;
+        width: 100%;
+        background: $panel;
+        color: $text;
+        padding: 0 2;
+        text-align: center;
     }
     """
 
@@ -42,6 +53,8 @@ class SearchScreen(Screen):
 
             yield DataTable()
 
+            yield Static("", id="result-count")
+
     def on_mount(self) -> None:
         input = self.query_one(Input)
 
@@ -56,16 +69,18 @@ class SearchScreen(Screen):
 
         table.cursor_type = "row"
         table.zebra_stripes = True
+
+        self.update_result_count()
     
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "back-btn":
             self.app.pop_screen()
-        # elif event.button.id == "time-travel-btn":
-            # self.app.push_screen(
-            #     FilterModal(),
-            #     self.handle_filter,
-            # )
+        elif event.button.id == "filter-btn":
+            self.app.push_screen(
+                FilterModal(),
+                self.handle_filter,
+            )
 
     @on(Input.Submitted)
     def handle_search(self, event: Input.Submitted) -> None:
@@ -83,3 +98,40 @@ class SearchScreen(Screen):
 
         else:
             pass
+
+        self.update_result_count()
+
+    def handle_filter(self, should_quit: bool) -> None:
+        pass
+
+        self.update_row_count()
+
+    @on(DataTable.HeaderSelected)
+    def handle_header_selected(self, event: DataTable.HeaderSelected) -> None:
+        table = event.data_table
+
+        table.sort(event.column_key)
+
+    @on(DataTable.RowSelected)
+    def handle_row_selected(self, event: DataTable.RowSelected) -> None:
+        table = event.data_table
+        row_key = event.row_key
+
+        [isbn, title, authors, status] = table.get_row(row_key)
+
+        book_data = {
+            "id": id,
+            "isbn": isbn,
+            "title": title,
+            "authors": authors,
+            "status": status,
+        }
+
+        self.app.push_screen(BookDetailModal(book_data))
+
+    def update_result_count(self) -> None:
+        table = self.query_one(DataTable)
+        count = table.row_count
+
+        item_count = self.query_one("#result-count", Static)
+        item_count.update(f"{count} results found")
