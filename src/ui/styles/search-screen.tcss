@@ -18,3 +18,7 @@ SearchScreen #result-count {
     padding: 0 2;
     text-align: center;
 }
+
+DataTable {
+    height: 1fr
+}

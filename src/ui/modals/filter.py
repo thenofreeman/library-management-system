@@ -2,7 +2,7 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
 from textual.screen import ModalScreen
-from textual.widgets import Label, Button, Select
+from textual.widgets import Label, Button, Select, SelectionList
 
 availability_options = ['All', 'Available', 'Unavailable']
 
@@ -17,30 +17,29 @@ class FilterModal(ModalScreen):
         with Vertical():
             yield Label("Filter", classes="title")
 
-            yield Select.from_values(
-                availability_options,
-                allow_blank=False,
-                value=(self.filters['availability']),
-                id="availability-select",
-            )
+            with Horizontal(classes="filter-row"):
+                yield Label("Columns")
+                yield SelectionList[int](
+                    *[(column[0], i, column[1]) for i, column in enumerate(self.filters['columns'])],
+                    compact=True,
+                    id="searched-columns"
+                )
 
-            # with Horizontal(classes="date-selector"):
-            #     yield Button("<", id="date-prev", classes="arrow-btn")
-            #     yield Label(
-            #         self.active_date.strftime("%m-%d-%Y"),
-            #         id="date-display",
-            #         classes="date-display",
-            #     )
-            #     yield Button(">", id="date-next", classes="arrow-btn")
+            with Horizontal(classes="filter-row"):
+                yield Label("Availability")
+                yield Select.from_values(
+                    availability_options,
+                    allow_blank=False,
+                    value=(self.filters['availability']),
+                    id="availability-select",
+                )
 
             with Horizontal(classes="button-row"):
                 yield Button("Cancel", id="cancel", variant="error")
                 yield Button("Confirm", id="confirm", variant="success")
 
-    @on(Select.Changed)
-    def handle_select_changed(self, event: Select.Changed) -> None:
-        if event.control.id == 'availability-select':
-            self.filters['availability'] = str(event.value)
+    def on_mount(self) -> None:
+        self.query_one(SelectionList).border_title = "Searched Columns"
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
@@ -48,7 +47,19 @@ class FilterModal(ModalScreen):
             pass
 
         elif event.button.id == "confirm":
+            self.filter_availability()
+            self.filter_columns()
+
             self.dismiss(self.filters)
 
         elif event.button.id == "cancel":
             self.dismiss(None)
+
+    def filter_availability(self) -> None:
+        self.filters['availability'] = str(self.query_one(Select).value)
+
+    def filter_columns(self) -> None:
+        selected_indices = self.query_one(SelectionList).selected
+        filters = [(column[0], i in selected_indices) for i, column in enumerate(self.filters['columns'])]
+
+        self.filters['columns'] = filters

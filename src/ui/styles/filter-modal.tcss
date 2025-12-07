@@ -4,7 +4,7 @@ FilterModal {
 
 FilterModal > Vertical {
     width: 60;
-    height: 14;
+    height: auto;
     border: thick $primary;
     background: $surface;
     padding: 1 2;
@@ -25,5 +25,18 @@ FilterModal .button-row {
 }
 
 FilterModal .button-row Button {
+    margin: 0 2;
+}
+
+FilterModal .filter-row {
+    width: 100%;
+    height: auto;
+    align: center middle;
+    margin-top: 1;
+}
+
+FilterModal .filter-row Label {
+    width: 30%;
+    align: center middle;
     margin: 0 2;
 }

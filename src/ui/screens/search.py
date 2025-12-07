@@ -10,13 +10,13 @@ from ui.components import NavbarComponent
 from ui.modals import BookDetailModal, FilterModal
 
 class SearchScreen(Screen):
-    CSS = "DataTable {height: 1fr}"
     SUB_TITLE = "Search"
 
     def __init__(self):
         super().__init__()
 
         self.filters = {
+            'columns': [('ISBN', True), ('Title', True), ('Authors', True)],
             'availability': 'All',
         }
 
@@ -111,7 +111,7 @@ class SearchScreen(Screen):
             "id": id,
             "isbn": isbn,
             "title": title,
-            "authors": authors,
+            "authors": authors.strip().split('|'),
             "status": status,
         }
 
