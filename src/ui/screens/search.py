@@ -87,6 +87,9 @@ class SearchScreen(Screen):
         self.update_result_count()
 
     def handle_filter(self, filters: dict) -> None:
+        if not filters:
+            return None
+
         self.filters = filters
 
         self.update_result_count()
