@@ -31,7 +31,7 @@ class HomeScreen(Screen):
             with Grid(classes="menu-grid"):
                 yield Button("Search Books", id="search-books", classes="menu-btn", variant="primary")
                 yield Button("Search Borrowers", id="search-borrowers", classes="menu-btn", variant="primary")
-                yield Button("Manage Borrowers", id="manage-borrowers", classes="menu-btn", variant="primary")
+                yield Button("Create A Borrower", id="create-borrower", classes="menu-btn", variant="primary")
                 yield Button("Settings", id="settings", classes="menu-btn", variant="primary")
 
         # Footer (empty for now)
@@ -50,7 +50,7 @@ class HomeScreen(Screen):
             self.app.push_screen(BookSearchScreen())
         elif event.button.id == "search-borrowers":
             self.app.push_screen(BorrowerSearchScreen())
-        elif event.button.id == "manage-borrowers":
+        elif event.button.id == "create-borrower":
             self.app.push_screen(BookSearchScreen())
         elif event.button.id == "settings":
             self.app.push_screen(BookSearchScreen())

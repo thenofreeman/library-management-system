@@ -25,8 +25,8 @@ class TimeTravelModal(ModalScreen[datetime]):
                 )
                 yield Button(">", id="date-next", classes="arrow-btn")
             with Horizontal(classes="button-row"):
-                yield Button("Cancel", id="cancel", variant="error")
                 yield Button("Confirm", id="confirm", variant="success")
+                yield Button("Cancel", id="cancel", variant="error")
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:

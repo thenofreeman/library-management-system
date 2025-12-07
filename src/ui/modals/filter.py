@@ -35,8 +35,8 @@ class FilterModal(ModalScreen):
                 )
 
             with Horizontal(classes="button-row"):
-                yield Button("Cancel", id="cancel", variant="error")
                 yield Button("Confirm", id="confirm", variant="success")
+                yield Button("Cancel", id="cancel", variant="error")
 
     def on_mount(self) -> None:
         self.query_one(SelectionList).border_title = "Searched Columns"
