@@ -2,6 +2,7 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 import os
+import html
 
 from .common import (
     BOOKS_TABLE_NAME,
@@ -214,6 +215,8 @@ def _import_data_from_csv() -> Optional[CSVData]:
                 header = rows[0]
 
                 for row in rows[1:]:
+                    row = [html.unescape(field) for field in row]
+
                     [idn, ssn, fname, lname, email, addr, city, state, phone] = row
                     full_name = f'{fname} {lname}'
                     address = f'{addr}, {city}, {state}'
@@ -243,6 +246,8 @@ def _import_data_from_csv() -> Optional[CSVData]:
                 author_set = dict()
 
                 for row in rows[1:]:
+                    row = [html.unescape(field) for field in row]
+
                     [isbn10, isbn13, title, authors, cover, pub, pages] = row
 
                     new_book = [isbn10, title]
