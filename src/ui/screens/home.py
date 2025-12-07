@@ -8,7 +8,7 @@ from textual.containers import Container, Grid
 
 from ui.components.navbar import NavbarComponent
 from ui.modals import QuitModal, TimeTravelModal
-from ui.screens import SearchScreen
+from ui.screens import BookSearchScreen, BorrowerSearchScreen
 
 class HomeScreen(Screen):
     SUB_TITLE = "Home"
@@ -47,13 +47,13 @@ class HomeScreen(Screen):
                 self.handle_time_travel,
             )
         elif event.button.id == "search-books":
-            self.app.push_screen(SearchScreen())
+            self.app.push_screen(BookSearchScreen())
         elif event.button.id == "search-borrowers":
-            self.app.push_screen(SearchScreen())
+            self.app.push_screen(BorrowerSearchScreen())
         elif event.button.id == "manage-borrowers":
-            self.app.push_screen(SearchScreen())
+            self.app.push_screen(BookSearchScreen())
         elif event.button.id == "settings":
-            self.app.push_screen(SearchScreen())
+            self.app.push_screen(BookSearchScreen())
 
     def handle_quit(self, should_quit: bool) -> None:
         if should_quit:

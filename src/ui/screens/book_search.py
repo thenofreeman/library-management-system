@@ -9,8 +9,8 @@ from operations import search
 from ui.components import NavbarComponent
 from ui.modals import BookDetailModal, FilterModal
 
-class SearchScreen(Screen):
-    SUB_TITLE = "Search"
+class BookSearchScreen(Screen):
+    SUB_TITLE = "Book Search"
 
     def __init__(self):
         super().__init__()

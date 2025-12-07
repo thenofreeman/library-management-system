@@ -2,7 +2,7 @@ BookDetailModal {
     align: center middle;
 }
 
-BookDetailModal > Vertical {
+BookDetailModal > Container {
     width: 60;
     height: auto;
     border: thick $primary;
@@ -10,16 +10,24 @@ BookDetailModal > Vertical {
     padding: 1 2;
 }
 
+BookDetailModal Vertical {
+    height: auto;
+}
+
 BookDetailModal #modal-title {
     width: 1fr;
     content-align: center middle;
 }
 
-BookDetailModal > Vertical > Button {
+BookDetailModal Button {
     width: 100%;
 }
 
 BookDetailModal .detail-line {
     margin: 1 0;
     height: auto;
+}
+
+DataTable {
+    height: 1fr
 }
