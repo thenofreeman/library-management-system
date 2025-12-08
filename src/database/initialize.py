@@ -40,8 +40,6 @@ def delete(db_name: str) -> bool:
     return False
 
 def _create_database() -> bool:
-    print(config.db_name)
-
     conn = sqlite3.connect(config.db_name)
     c = conn.cursor()
 

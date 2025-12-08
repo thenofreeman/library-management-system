@@ -23,20 +23,19 @@ def search_books(search_term: str) -> list[BookSearchResult]:
         GROUP_CONCAT(a.Name, ', ') as Author_names,
         GROUP_CONCAT(a.Author_id, ', ') as Author_ids,
         CASE
-            WHEN l.Isbn IS NULL THEN 1
-            WHEN l.Date_in IS NULL THEN 0
+            WHEN l.Isbn IS NOT NULL THEN 0
             ELSE 1
         END as Status,
-        br.Card_id as Card_id
+        l.Card_id as Card_id
     FROM {BOOKS_TABLE_NAME} b
     LEFT JOIN {BOOK_AUTHORS_TABLE_NAME} ba ON ba.Isbn = b.Isbn
     LEFT JOIN {AUTHORS_TABLE_NAME} a ON a.Author_id = ba.Author_id
-    LEFT JOIN {BOOK_LOANS_TABLE_NAME} l ON b.Isbn = l.Isbn
+    LEFT JOIN {BOOK_LOANS_TABLE_NAME} l ON b.Isbn = l.Isbn AND l.Date_in IS NULL
     LEFT JOIN {BORROWERS_TABLE_NAME} br ON br.Card_id = l.Card_id
     WHERE b.Isbn LIKE ? COLLATE NOCASE
        OR b.Title LIKE ? COLLATE NOCASE
        OR a.Name LIKE ? COLLATE NOCASE
-    GROUP BY b.Isbn, b.Title, l.Isbn, l.Date_in
+    GROUP BY b.Isbn
     """
     params = [f"%{search_term}%" for _ in range(3)]
 

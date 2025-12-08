@@ -89,12 +89,16 @@ class SearchScreen(Screen):
 
         self.results = self.search_fn(value, self.filters)
 
+        print(self.results[0])
+
         if not self.results:
             self.update_result_count()
             return
 
+        self.result_lookup = {}
         for row_data in self.results:
-            table.add_row(*row_data.model_dump().values(), key=str(row_data.id))
+            row_key = table.add_row(*row_data.model_dump().values(), key=row_data.isbn)
+            self.result_lookup[row_data.isbn] = row_data
 
         self.update_result_count()
 
@@ -117,8 +121,7 @@ class SearchScreen(Screen):
 
     @on(DataTable.RowSelected)
     def handle_row_selected(self, event: DataTable.RowSelected) -> None:
-        row_data = next(m for m in self.results if str(m.id) == event.row_key)
-
+        row_data = self.result_lookup[event.row_key.value]
         data = self.get_detail_data(row_data)
 
         self.app.push_screen(

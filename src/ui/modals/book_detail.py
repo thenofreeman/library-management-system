@@ -59,7 +59,7 @@ class BookDetailModal(BaseModal):
                                             ]
                                         )
 
-                                        yield Button("Check-Out Book", id="checkout-btn", variant="primary")
+                                        yield Button("Check-Out Book", id="checkout-button", variant="primary")
 
                             else:
                                 if self.borrower_data:
@@ -74,7 +74,7 @@ class BookDetailModal(BaseModal):
                                         yield Label(f"Loaned On: {loan.date_out}", classes="detail-line")
                                         yield Label(f"Due: {loan.due_date}", classes="detail-line")
 
-                                    yield Button("Check-In Book", id="checkin-btn", variant="primary")
+                                    yield Button("Check-In Book", id="checkin-button", variant="primary")
 
                     with TabPane("Checkout History"):
                         with Vertical():
@@ -92,7 +92,7 @@ class BookDetailModal(BaseModal):
         table.add_column("Date Out", width=12)
         table.add_column("Date In", width=12)
 
-        book_loans = db.get_loans_by_isbn(self.book_data.isbn)
+        book_loans = db.get_loans_by_isbn(self.book_data.isbn, returned=True)
 
         if book_loans:
             for loan in book_loans:
@@ -105,7 +105,7 @@ class BookDetailModal(BaseModal):
         if event.button.id == 'close-button':
             self.dismiss()
 
-        elif event.button.id == 'checkout-btn':
+        elif event.button.id == 'checkout-button':
             input = self.query_one(Input)
 
             success = db.create_loan(self.book_data.isbn, input.value)
@@ -115,8 +115,16 @@ class BookDetailModal(BaseModal):
             else:
                 pass # TODO show invalid or failed
 
-        elif event.button.id == 'checkin-btn':
-            pass # TODO: show confirm modal
+        elif event.button.id == 'checkin-button':
+            loan = None
+            if self.book_data.borrower_id:
+                loan = db.get_loans_by_borrower_id(self.borrower_data.id)[0]
+
+            if loan:
+                success = db.checkin(loan.id)
+
+                if success:
+                    self.dismiss()
 
     @on(Tag.Clicked)
     def handle_tag_clicked(self, event: Tag.Clicked) -> None:

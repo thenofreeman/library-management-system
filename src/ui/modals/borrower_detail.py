@@ -16,12 +16,21 @@ class BorrowerDetailModal(BaseModal):
 
         self.borrower_data = db.get_borrower_by_id(borrower_result.id)
 
-        self.checkouts = []
+        self.active_checkouts = []
+        self.all_checkouts = []
+
         if self.borrower_data:
-            self.checkouts = db.get_loans_by_borrower_id(self.borrower_data.id, returned=False)
+            self.active_checkouts = db.get_loans_by_borrower_id(self.borrower_data.id, returned=False)
+            self.all_checkouts = db.get_loans_by_borrower_id(self.borrower_data.id, returned=True)
 
     def on_mount(self) -> None:
-        pass
+        table = self.query_one(DataTable)
+
+        table.zebra_stripes = True
+
+        table.add_columns(*["Loan", "ISBN", "Date Out", "In"])
+        for loan in self.all_checkouts:
+            table.add_row(loan.id, loan.isbn, loan.date_out, loan.date_in)
 
     def compose(self) -> ComposeResult:
         with Container(id="modal-container"):
@@ -44,46 +53,26 @@ class BorrowerDetailModal(BaseModal):
                             with Vertical():
                                 with Vertical(classes="input-field"):
                                     yield Label("Active Checkouts")
-                                    yield SelectionList[int](
-                                        *[(f"[{loan.isbn}] {loan.title}",
-                                           loan.id,
-                                           bool(loan.date_in)
-                                           ) for loan in self.checkouts],
-                                        compact=True,
-                                        id="searched-columns"
-                                    )
 
-                                    yield Button("Check-in Books", id="checkin-btn", variant="primary")
+                                    if not self.active_checkouts:
+                                        yield Label("No Checkouts")
+                                    else:
+                                        yield SelectionList[int](
+                                            *[(f"[{loan.isbn}] {loan.title}",
+                                            loan.id,
+                                            bool(loan.date_in)
+                                            ) for loan in self.active_checkouts],
+                                            compact=True,
+                                            id="searched-columns"
+                                        )
 
-                        #         if self.book_data['status'] == True:
-                        #             yield Input(
-                        #                 placeholder="Enter a Borrower ID...",
-                        #                 type="text",
-                        #                 validators=[
-                        #                     Length(minimum=1)
-                        #                 ]
-                        #             )
-
-                        #             yield Button("Check-Out Book", id="checkout-btn", variant="primary")
-
-                        #         else:
-                        #             yield Label(f"Borrower ID: {self.borrower_id}", classes="detail-line")
-                        #             yield Label(f"Borrower Name: {self.borrower_name}", classes="detail-line")
-
-                        #             loans = db.get_loans_by_borrower_id(self.borrower_id)
-
-                        #             if loans:
-                        #                 (loan_id, _, _, _, date_out, due_date, _) = loans[0]
-
-                        #                 yield Label(f"Loan ID: {loan_id}", classes="detail-line")
-                        #                 yield Label(f"Loaned On: {date_out}", classes="detail-line")
-                        #                 yield Label(f"Due: {due_date}", classes="detail-line")
-
-                        #             yield Button("Check-In Book", id="checkin-btn", variant="primary")
+                                        yield Button("Check-in Books", id="checkin-button", variant="primary")
 
                         with TabPane("Checkout History"):
                             with Vertical():
-                                yield DataTable()
+                                yield DataTable(
+
+                                )
                                 yield Static("", id="result-count")
 
                 with Horizontal(classes="form-buttons"):
@@ -95,7 +84,15 @@ class BorrowerDetailModal(BaseModal):
             self.dismiss()
 
         elif event.button.id == 'checkin-button':
-            success = db.checkin_many(self.checkouts)
+            selection_list = self.query_one(SelectionList)
 
-            if success:
-                self.dismiss()
+            selected_items = [
+                self.active_checkouts[idx-1]
+                for idx in selection_list.selected
+            ]
+
+            if selected_items:
+                success = db.checkin_many(selected_items)
+
+                if success:
+                    self.dismiss()

@@ -40,6 +40,7 @@ class BookSearchResult(BaseModel):
         return " & ".join(authors)
 
 class BorrowerSearchResult(BaseModel):
+    model_config = { 'frozen': True }
     id: int = Field(alias='Card_id')
     name: str = Field(alias='Bname')
     active_loan_count: int = Field(alias='N_Active_loans')

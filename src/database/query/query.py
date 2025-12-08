@@ -8,8 +8,6 @@ def get_one_or_none(sql: str, params: list) -> Optional[Any]:
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
-    print(params)
-
     c.execute(sql, params)
     result = c.fetchone()
 
@@ -39,7 +37,6 @@ def try_execute_many(sql: str, params: list) -> bool:
         c.executemany(sql, params)
         conn.commit()
     except sqlite3.Error as e:
-        print(e)
         conn.rollback()
         success = False
 
@@ -57,7 +54,6 @@ def try_execute_one(sql: str, params: list) -> bool:
         c.execute(sql, params)
         conn.commit()
     except sqlite3.Error as e:
-        print(e)
         conn.rollback()
         success = False
 

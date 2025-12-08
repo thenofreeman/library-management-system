@@ -60,14 +60,17 @@ def get_borrower_by_id(borrower_id: int) -> Optional[Borrower]:
     return _get_borrower("Card_id", str(borrower_id))
 
 def _get_borrower(column: str, param: str) -> Optional[Borrower]:
+    if column == 'Card_id':
+        column = 'b.Card_id'
+
     sql = f"""
     SELECT
-        Card_id,
-        Ssn,
-        Bname,
-        Address,
-        Phone
-    FROM {BORROWERS_TABLE_NAME}
+        b.Card_id,
+        b.Ssn,
+        b.Bname,
+        b.Address,
+        b.Phone
+    FROM {BORROWERS_TABLE_NAME} b
     WHERE {column} = ?
     """
 

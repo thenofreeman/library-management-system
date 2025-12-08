@@ -16,7 +16,7 @@ from logger import Logger
 def search_loans(isbn: str | None = None,
                      borrower_id: str | None = None,
                      name: str | None = None,
-                     returned: bool | None = None) -> list[Loan]:
+                     returned: bool = False) -> list[Loan]:
     sql = f"""
     SELECT
         l.Loan_id,
@@ -35,8 +35,8 @@ def search_loans(isbn: str | None = None,
     conditions = []
     params = []
 
-    if returned:
-        sql += 'WHERE l.Date_in IS NULL'
+    if not returned:
+        sql += ' WHERE l.Date_in IS NULL'
 
     if isbn:
         conditions.append("l.Isbn LIKE ? COLLATE NOCASE")
@@ -51,7 +51,7 @@ def search_loans(isbn: str | None = None,
         params.append(f"%{name}%")
 
     if conditions:
-        if not returned:
+        if returned:
             sql += " WHERE (" + " OR ".join(conditions) + ")"
         else:
             sql += " AND (" + " OR ".join(conditions) + ")"
@@ -122,18 +122,20 @@ def create_loan(isbn: str, borrower_id: int) -> bool:
 
     return query.try_execute_one(sql, params)
 
-def checkin(loan_id: int) -> bool:
-    return db.resolve_loan(loan_id)
-
 def checkin_many(loans: list[Loan]) -> bool:
     all_success = True
 
     for loan in loans:
         success = db.checkin(loan.id)
 
+        print(success, loan.id, 'tested')
+
         all_success = all_success and success
 
     return all_success
+
+def checkin(loan_id: int) -> bool:
+    return db.resolve_loan(loan_id)
 
 def resolve_loan(loan_id: int) -> bool:
     sql = f"""
@@ -145,5 +147,7 @@ def resolve_loan(loan_id: int) -> bool:
     date_in = datetime.now().strftime('%Y-%m-%d')
 
     params = [date_in, loan_id]
+
+    print(loan_id)
 
     return query.try_execute_one(sql, params)

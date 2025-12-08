@@ -14,7 +14,7 @@ from . import query, metadata
 
 from logger import Logger
 
-def get_all_fines(unpaid: bool = False) -> Optional[list[Fine]]:
+def get_all_fines(paid: bool = False) -> Optional[list[Fine]]:
     sql = f"""
     SELECT
         f.Loan_id,
@@ -24,13 +24,13 @@ def get_all_fines(unpaid: bool = False) -> Optional[list[Fine]]:
     FROM {FINES_TABLE_NAME} f
     JOIN {BOOK_LOANS_TABLE_NAME} l ON l.Loan_id = f.Loan_id
     JOIN {BOOKS_TABLE_NAME} b ON b.Isbn = l.Isbn
-    {'WHERE f.Paid = 0' if unpaid else ''}
+    {'WHERE f.Paid = 0' if not paid else ''}
     ORDER BY l.Date_out DESC
     """
 
     return query.get_all_or_none(sql, [])
 
-def get_fines_by_borrower_id(borrower_id: int, unpaid: bool = False) -> Optional[list[Fine]]:
+def get_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> Optional[list[Fine]]:
     sql = f"""
     SELECT
         f.Loan_id,
@@ -40,7 +40,7 @@ def get_fines_by_borrower_id(borrower_id: int, unpaid: bool = False) -> Optional
     FROM {FINES_TABLE_NAME} f
     JOIN {BOOK_LOANS_TABLE_NAME} l ON l.Loan_id = f.Loan_id
     JOIN {BOOKS_TABLE_NAME} b ON b.Isbn = l.Isbn
-    WHERE l.Card_id = ? {'AND f.Paid = 0' if unpaid else ''}
+    WHERE l.Card_id = ? {'AND f.Paid = 0' if not paid else ''}
     ORDER BY l.Date_out DESC
     """
 
@@ -102,7 +102,7 @@ def update_fines() -> bool:
     if not should_update:
         return True
 
-    books_out = db.get_all_fines(unpaid=True)
+    books_out = db.get_all_fines(paid=True)
 
     if not books_out:
         # no books out, already up to date
