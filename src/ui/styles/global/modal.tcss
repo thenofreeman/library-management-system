@@ -5,6 +5,7 @@ ModalScreen {
 #modal-container {
     width: 60;
     height: auto;
+    max-height: 80%;
     border: thick $primary;
     background: $surface;
     padding: 1 2;

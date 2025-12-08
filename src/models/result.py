@@ -27,6 +27,10 @@ class BookSearchResult(BaseModel):
     def status_display(self) -> str:
         return self.serialize_status(self.status)
 
+    @property
+    def id(self) -> str:
+        return self.isbn
+
     @field_serializer('status')
     def serialize_status(self, status: bool) -> str:
         return "Available" if status else "Unavailable"

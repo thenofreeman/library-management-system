@@ -8,7 +8,7 @@ from database.names import (
     BORROWERS_TABLE_NAME
 )
 
-from models import BookSearchResult, Book
+from models import BookSearchResult
 
 from . import query
 
@@ -47,7 +47,7 @@ def search_books(search_term: str) -> list[BookSearchResult]:
 
     return [BookSearchResult(**dict(result)) for result in results]
 
-def get_book_by_isbn(isbn: str) -> Optional[Book]:
+def get_book_by_isbn(isbn: str) -> Optional[BookSearchResult]:
     books = search_books(isbn)
 
     if not books:

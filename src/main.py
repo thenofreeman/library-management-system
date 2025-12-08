@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
+from pathlib import Path
 
 import database as db
 
 from app import app
+
+project_root = Path(__file__).parent
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Library Management System.")
@@ -14,10 +17,10 @@ def main() -> None:
     # parser.add_argument('-v', '--verbose', help='Show logs.')
     args = parser.parse_args()
 
-    db_name = "library.db"
+    db_name = str(project_root / "library.db")
 
     if args.library:
-        db_name = args.library
+        db_name = str(project_root / args.library)
 
     db_exists = db.exists(db_name)
 
@@ -47,6 +50,7 @@ def main() -> None:
         print("  Hint: Use the '--init' command line flag.")
         exit(1)
 
+    db.config.set_db_name(db_name)
     app.run()
 
 if __name__ == '__main__':

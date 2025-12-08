@@ -36,9 +36,7 @@ class SearchScreen(Screen):
 
     def compose(self) -> ComposeResult:
         right_button = (
-            Button("Filter", id="filter-btn", variant="primary")
-            if self.filters
-            else None
+            Button("Filter", id="filter-btn", variant="primary") if self.filters else None
         )
 
         yield NavbarComponent(
@@ -96,7 +94,7 @@ class SearchScreen(Screen):
             return
 
         for row_data in self.results:
-            table.add_row(*row_data.model_dump().values())
+            table.add_row(*row_data.model_dump().values(), key=str(row_data.id))
 
         self.update_result_count()
 
@@ -119,9 +117,7 @@ class SearchScreen(Screen):
 
     @on(DataTable.RowSelected)
     def handle_row_selected(self, event: DataTable.RowSelected) -> None:
-        table = event.data_table
-        idx = table.get_row_index(event.row_key)
-        row_data = self.results[idx]
+        row_data = next(m for m in self.results if str(m.id) == event.row_key)
 
         data = self.get_detail_data(row_data)
 

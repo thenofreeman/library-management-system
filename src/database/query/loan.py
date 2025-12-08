@@ -5,7 +5,7 @@ from database.names import (
     BOOK_LOANS_TABLE_NAME,
 )
 
-from database.dtypes import Loan, LoanSearchResult
+from models import Loan
 
 import database as db
 
@@ -16,25 +16,27 @@ from logger import Logger
 def search_loans(isbn: str | None = None,
                      borrower_id: str | None = None,
                      name: str | None = None,
-                     only_returned: bool | None = None) -> Optional[list[LoanSearchResult]]:
+                     returned: bool | None = None) -> list[Loan]:
     sql = f"""
     SELECT
         l.Loan_id,
         l.Isbn,
         b.Title,
+        br.Card_id,
         l.Card_id,
-        br.Bname,
         l.Date_out,
+        l.Due_date,
         l.Date_in
     FROM BOOK_LOANS l
     JOIN BOOK b ON b.Isbn = l.Isbn
     JOIN BORROWER br ON br.Card_id = l.Card_id
-    WHERE l.Date_in IS NULL
-      {'' if only_returned else 'AND l.Date_in IS NULL'}
     """
 
     conditions = []
     params = []
+
+    if returned:
+        sql += 'WHERE l.Date_in IS NULL'
 
     if isbn:
         conditions.append("l.Isbn LIKE ? COLLATE NOCASE")
@@ -42,29 +44,37 @@ def search_loans(isbn: str | None = None,
 
     if borrower_id:
         conditions.append("br.Card_id LIKE ?")
-        params.append(f"%{isbn}%")
+        params.append(f"%{borrower_id}%")
 
     if name:
         conditions.append("br.Bname LIKE ? COLLATE NOCASE")
-        params.append(f"%{isbn}%")
+        params.append(f"%{name}%")
 
     if conditions:
-        sql += " AND (" + " OR ".join(conditions) + ")"
+        if not returned:
+            sql += " WHERE (" + " OR ".join(conditions) + ")"
+        else:
+            sql += " AND (" + " OR ".join(conditions) + ")"
 
     sql += " ORDER BY l.Date_out DESC"
 
-    return query.get_all_or_none(sql, params)
+    results = query.get_all_or_none(sql, params)
 
-def get_loans_by_borrower_id(borrower_id: int, only_returned: bool = False) -> Optional[list[Loan]]:
-    return db.search_loans(borrower_id=str(borrower_id), only_returned=only_returned)
+    if not results:
+        return []
 
-def get_loans_by_isbn(isbn: str, only_returned: bool = False) -> Optional[list[Loan]]:
-    return db.search_loans(isbn=isbn, only_returned=only_returned)
+    return [Loan(**dict(result)) for result in results]
 
-def checkout(isbn: str, borrower_id: str) -> bool:
+def get_loans_by_borrower_id(borrower_id: int, returned: bool = False) -> list[Loan]:
+    return db.search_loans(borrower_id=str(borrower_id), returned=returned)
+
+def get_loans_by_isbn(isbn: str, returned: bool = False) -> list[Loan]:
+    return db.search_loans(isbn=isbn, returned=returned)
+
+def checkout(isbn: str, borrower_id: int) -> bool:
     return db.create_loan(isbn, borrower_id)
 
-def create_loan(isbn: str, borrower_id: str) -> bool:
+def create_loan(isbn: str, borrower_id: int) -> bool:
     borrower = db.get_borrower_by_id(borrower_id)
 
     if not borrower:
@@ -106,7 +116,7 @@ def create_loan(isbn: str, borrower_id: str) -> bool:
     """
 
     date_out = datetime.now().strftime('%Y-%m-%d')
-    due_date = datetime.today() + timedelta(days=14)
+    due_date = (datetime.today() + timedelta(days=14)).strftime('%Y-%m-%d')
 
     params = [isbn, borrower_id, date_out, due_date]
 
@@ -114,6 +124,16 @@ def create_loan(isbn: str, borrower_id: str) -> bool:
 
 def checkin(loan_id: int) -> bool:
     return db.resolve_loan(loan_id)
+
+def checkin_many(loans: list[Loan]) -> bool:
+    all_success = True
+
+    for loan in loans:
+        success = db.checkin(loan.id)
+
+        all_success = all_success and success
+
+    return all_success
 
 def resolve_loan(loan_id: int) -> bool:
     sql = f"""

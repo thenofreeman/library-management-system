@@ -27,19 +27,21 @@ class BookSearchScreen(SearchScreen):
             search_fn=book_search,
             detail_modal=BookDetailModal,
             placeholder="Search by ISBN, title, or author...",
-            on_detail_callback=self.handle_author_selected,
+            on_detail_callback=self.handle_response,
             filters={
                 'columns': [('ISBN', True), ('Title', True), ('Authors', True)],
                 'availability': 'All',
             }
         )
 
-    def get_detail_data(self, row_data: tuple) -> BookSearchResult:
+    def get_detail_data(self, row_data: BookSearchResult) -> BookSearchResult:
         return row_data
 
+    def handle_response(self, new_query: str | None) -> None:
+        input = self.query_one(Input)
 
-    def handle_author_selected(self, author_name: str | None) -> None:
-        if author_name:
-            input = self.query_one(Input)
-            input.value = author_name
+        if new_query:
+            input.value = new_query
+            self.handle_search(input.value)
+        else:
             self.handle_search(input.value)

@@ -13,8 +13,6 @@ from database import schema, config
 
 from database.import_data import from_csv
 
-from logger import Logger
-
 def init(db_name: str) -> bool:
     config.set_db_name(db_name)
 

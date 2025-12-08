@@ -30,7 +30,7 @@ def get_all_fines(unpaid: bool = False) -> Optional[list[Fine]]:
 
     return query.get_all_or_none(sql, [])
 
-def get_fines_by_borrower_id(borrower_id: str, unpaid: bool = False) -> Optional[list[Fine]]:
+def get_fines_by_borrower_id(borrower_id: int, unpaid: bool = False) -> Optional[list[Fine]]:
     sql = f"""
     SELECT
         f.Loan_id,
@@ -59,7 +59,7 @@ def get_fines_last_updated() -> Optional[date]:
 
     return datetime.fromisoformat(result[0])
 
-def pay_fines(borrower_id: str, amt: int) -> bool:
+def pay_fines(borrower_id: int, amt: int) -> bool:
     borrower = db.get_borrower_by_id(borrower_id)
 
     if not borrower:

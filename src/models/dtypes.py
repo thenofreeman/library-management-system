@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -26,9 +27,10 @@ class Borrower(BaseModel):
 class Loan(BaseModel):
     id: int = Field(alias='Loan_id')
     isbn: str = Field(alias='Isbn')
-    borrower_id: int = Field(alias='borrower_id')
+    borrower_id: int = Field(alias='Card_id')
+    title: str = Field(alias='Title')
     date_out: date = Field(alias='Date_out')
-    date_in: date = Field(alias='Date_in')
+    date_in: Optional[date] = Field(alias='Date_in')
     due_date: date = Field(alias='Due_date')
 
 class Fine(BaseModel):

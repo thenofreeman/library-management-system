@@ -14,33 +14,13 @@ from ui.custom import BaseModal
 
 class BookDetailModal(BaseModal):
 
-    def __init__(self, book_data: BookSearchResult) -> None:
+    def __init__(self, book_result: BookSearchResult) -> None:
         super().__init__()
 
-        self.book_data = book_data
+        self.book_data = book_result
 
         if self.book_data.borrower_id:
-            self.borrower_name = db.get_borrower_by_id(self.book_data.borrower_id)
-
-        # if self.borrower_id:
-        #     borrower_data = db.get_borrower_by_id(self.borrower_id)
-        #     self.borrower_name = borrower_data[0] if borrower_data else None
-
-    def on_mount(self) -> None:
-        table = self.query_one(DataTable)
-
-        table.add_column("Loan ID", width=8)
-        table.add_column("Borrower ID", width=12)
-        table.add_column("Date Out", width=12)
-        table.add_column("Date In", width=12)
-
-        book_loans = db.get_loans_by_isbn(self.book_data.isbn)
-
-        if book_loans:
-            for (loan_id, _, _, borrower_id, date_out, _, date_in) in book_loans:
-                table.add_row(loan_id, borrower_id, date_out, date_in)
-
-        self.update_result_count()
+            self.borrower_data = db.get_borrower_by_id(self.book_data.borrower_id)
 
     def compose(self) -> ComposeResult:
         with Container(id="modal-container"):
@@ -59,41 +39,42 @@ class BookDetailModal(BaseModal):
                                     yield Tag(author)
 
                             yield Label(f"Status: {self.book_data.status_display}", classes="detail-line")
-                            if self.book_data.borrower_id:
+                            if self.book_data.borrower_id and self.borrower_data:
                                 yield Label(
-                                    f"Borrower: {self.borrower_name} (ID: {self.book_data.borrower_id})",
+                                    f"Borrower: {self.borrower_data.name} (ID: {self.borrower_data.id})",
                                     classes="detail-line"
                                 )
 
                     with TabPane("Manage"):
                         with Vertical():
-                            if self.book_data.status == True:
-                                yield Input(
-                                    placeholder="Enter a Borrower ID...",
-                                    type="text",
-                                    validators=[
-                                        Length(minimum=1)
-                                    ]
-                                )
+                            if self.book_data.status:
+                                with Vertical(classes="input-field"):
+                                    yield Label("Checkout Book")
+                                    with Horizontal(classes='side-by-side'):
+                                        yield Input(
+                                            placeholder="Enter a Borrower ID...",
+                                            type="text",
+                                            validators=[
+                                                Length(minimum=1)
+                                            ]
+                                        )
 
-                                yield Button("Check-Out Book", id="checkout-btn", variant="primary")
+                                        yield Button("Check-Out Book", id="checkout-btn", variant="primary")
 
                             else:
-                                yield Label(f"Borrower ID: {self.book_data.borrower_id}", classes="detail-line")
-                                yield Label(f"Borrower Name: {self.borrower_name}", classes="detail-line")
+                                if self.borrower_data:
+                                    yield Label(f"Borrower: {self.borrower_data.name} (ID: {self.borrower_data.id})", classes="detail-line")
 
-                                loans = None
-                                if self.book_data.borrower_id:
-                                    loans = db.get_loans_by_borrower_id(self.book_data.borrower_id)
+                                    loan = None
+                                    if self.book_data.borrower_id:
+                                        loan = db.get_loans_by_borrower_id(self.borrower_data.id)[0]
 
-                                if loans:
-                                    (loan_id, _, _, _, date_out, due_date, _) = loans[0]
+                                    if loan:
+                                        yield Label(f"Loan ID: {loan.id}", classes="detail-line")
+                                        yield Label(f"Loaned On: {loan.date_out}", classes="detail-line")
+                                        yield Label(f"Due: {loan.due_date}", classes="detail-line")
 
-                                    yield Label(f"Loan ID: {loan_id}", classes="detail-line")
-                                    yield Label(f"Loaned On: {date_out}", classes="detail-line")
-                                    yield Label(f"Due: {due_date}", classes="detail-line")
-
-                                yield Button("Check-In Book", id="checkin-btn", variant="primary")
+                                    yield Button("Check-In Book", id="checkin-btn", variant="primary")
 
                     with TabPane("Checkout History"):
                         with Vertical():
@@ -101,7 +82,23 @@ class BookDetailModal(BaseModal):
                             yield Static("", id="result-count")
 
             with Horizontal(classes="form-buttons"):
-                yield Button("Close", id="close-button", variant="primary")
+               yield Button("Close", id="close-button", variant="primary")
+
+    def on_mount(self) -> None:
+        table = self.query_one(DataTable)
+
+        table.add_column("Loan ID", width=8)
+        table.add_column("Borrower ID", width=12)
+        table.add_column("Date Out", width=12)
+        table.add_column("Date In", width=12)
+
+        book_loans = db.get_loans_by_isbn(self.book_data.isbn)
+
+        if book_loans:
+            for loan in book_loans:
+                table.add_row(loan.id, loan.borrower_id, loan.date_out, loan.date_in)
+
+        self.update_result_count()
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
@@ -111,7 +108,6 @@ class BookDetailModal(BaseModal):
         elif event.button.id == 'checkout-btn':
             input = self.query_one(Input)
 
-            # TODO: shouldn't allow creating loan for the same book
             success = db.create_loan(self.book_data.isbn, input.value)
 
             if success:

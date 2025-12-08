@@ -8,6 +8,8 @@ def get_one_or_none(sql: str, params: list) -> Optional[Any]:
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
+    print(params)
+
     c.execute(sql, params)
     result = c.fetchone()
 
