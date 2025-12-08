@@ -1,10 +1,11 @@
 import sqlite3
-from typing import Optional
+from typing import Optional, Any
 
 from database import config
 
-def get_one_or_none(sql: str, params: list) -> Optional[tuple]:
+def get_one_or_none(sql: str, params: list) -> Optional[Any]:
     conn = sqlite3.connect(config.db_name)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     c.execute(sql, params)
@@ -12,22 +13,17 @@ def get_one_or_none(sql: str, params: list) -> Optional[tuple]:
 
     conn.close()
 
-    if not result:
-        return None
-
     return result
 
-def get_all_or_none(sql: str, params: list) -> Optional[list[tuple]]:
+def get_all_or_none(sql: str, params: list) -> Optional[list]:
     conn = sqlite3.connect(config.db_name)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     c.execute(sql, params)
     result = c.fetchall()
 
     conn.close()
-
-    if not result:
-        return None
 
     return result
 

@@ -16,7 +16,7 @@ class SearchScreen(Screen):
         self,
         title: str,
         columns: list[tuple[str, int]],
-        search_fn: Callable[[str, Optional[dict]], Optional[list]],
+        search_fn: Callable[[str, Optional[dict]], list],
         detail_modal: type,
         filters: Optional[dict] = None,
         placeholder: str = "Search...",
@@ -31,6 +31,8 @@ class SearchScreen(Screen):
         self.placeholder = placeholder
         self.on_detail_callback = on_detail_callback
         self.filters = filters
+
+        self.results = []
 
     def compose(self) -> ComposeResult:
         right_button = (
@@ -87,14 +89,14 @@ class SearchScreen(Screen):
         table = self.query_one(DataTable)
         table.clear()
 
-        results = self.search_fn(value, self.filters)
+        self.results = self.search_fn(value, self.filters)
 
-        if not results:
+        if not self.results:
             self.update_result_count()
             return
 
-        for row_data in results:
-            table.add_row(*row_data)
+        for row_data in self.results:
+            table.add_row(*row_data.model_dump().values())
 
         self.update_result_count()
 
@@ -118,13 +120,13 @@ class SearchScreen(Screen):
     @on(DataTable.RowSelected)
     def handle_row_selected(self, event: DataTable.RowSelected) -> None:
         table = event.data_table
-        row_key = event.row_key
-        row_data = table.get_row(row_key)
+        idx = table.get_row_index(event.row_key)
+        row_data = self.results[idx]
 
-        data_dict = self.get_detail_data(row_data)
+        data = self.get_detail_data(row_data)
 
         self.app.push_screen(
-            self.detail_modal(data_dict),
+            self.detail_modal(data),
             self.handle_detail_response
         )
 

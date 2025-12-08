@@ -1,6 +1,5 @@
 from typing import Optional
 
-from database.dtypes import Book
 from database.names import (
     BOOKS_TABLE_NAME,
     BOOK_AUTHORS_TABLE_NAME,
@@ -9,9 +8,11 @@ from database.names import (
     BORROWERS_TABLE_NAME
 )
 
+from models import BookSearchResult, Book
+
 from . import query
 
-def search_books(search_term: str) -> Optional[list[Book]]:
+def search_books(search_term: str) -> list[BookSearchResult]:
     if not search_term:
         return []
 
@@ -19,13 +20,14 @@ def search_books(search_term: str) -> Optional[list[Book]]:
     SELECT
         b.Isbn as Isbn,
         b.Title as Title,
-        GROUP_CONCAT(a.Name, ', ') as Authors,
+        GROUP_CONCAT(a.Name, ', ') as Author_names,
+        GROUP_CONCAT(a.Author_id, ', ') as Author_ids,
         CASE
             WHEN l.Isbn IS NULL THEN 1
             WHEN l.Date_in IS NULL THEN 0
             ELSE 1
         END as Status,
-        br.Card_id
+        br.Card_id as Card_id
     FROM {BOOKS_TABLE_NAME} b
     LEFT JOIN {BOOK_AUTHORS_TABLE_NAME} ba ON ba.Isbn = b.Isbn
     LEFT JOIN {AUTHORS_TABLE_NAME} a ON a.Author_id = ba.Author_id
@@ -38,7 +40,12 @@ def search_books(search_term: str) -> Optional[list[Book]]:
     """
     params = [f"%{search_term}%" for _ in range(3)]
 
-    return query.get_all_or_none(sql, params)
+    results = query.get_all_or_none(sql, params)
+
+    if not results:
+        return []
+
+    return [BookSearchResult(**dict(result)) for result in results]
 
 def get_book_by_isbn(isbn: str) -> Optional[Book]:
     books = search_books(isbn)

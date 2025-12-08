@@ -5,7 +5,7 @@ from database.names import (
     BOOK_LOANS_TABLE_NAME,
 )
 
-from database.dtypes import Loan
+from database.dtypes import Loan, LoanSearchResult
 
 import database as db
 
@@ -16,7 +16,7 @@ from logger import Logger
 def search_loans(isbn: str | None = None,
                      borrower_id: str | None = None,
                      name: str | None = None,
-                     only_returned: bool | None = None) -> Optional[list[Loan]]:
+                     only_returned: bool | None = None) -> Optional[list[LoanSearchResult]]:
     sql = f"""
     SELECT
         l.Loan_id,
@@ -55,8 +55,8 @@ def search_loans(isbn: str | None = None,
 
     return query.get_all_or_none(sql, params)
 
-def get_loans_by_borrower_id(borrower_id: str, only_returned: bool = False) -> Optional[list[Loan]]:
-    return db.search_loans(borrower_id=borrower_id, only_returned=only_returned)
+def get_loans_by_borrower_id(borrower_id: int, only_returned: bool = False) -> Optional[list[Loan]]:
+    return db.search_loans(borrower_id=str(borrower_id), only_returned=only_returned)
 
 def get_loans_by_isbn(isbn: str, only_returned: bool = False) -> Optional[list[Loan]]:
     return db.search_loans(isbn=isbn, only_returned=only_returned)

@@ -1,12 +1,11 @@
 from typing import Optional
 
-from database.dtypes import Borrower
+from models import BorrowerSearchResult, Borrower
+
 from database.names import (
-    BOOKS_TABLE_NAME,
-    BOOK_AUTHORS_TABLE_NAME,
     BOOK_LOANS_TABLE_NAME,
-    AUTHORS_TABLE_NAME,
-    BORROWERS_TABLE_NAME
+    BORROWERS_TABLE_NAME,
+    FINES_TABLE_NAME
 )
 
 import database as db
@@ -15,40 +14,50 @@ from . import query
 
 from logger import Logger
 
-# TODO: NOT PROPER QUERY
-def search_borrowers(search_term: str) -> Optional[list[Borrower]]:
+def search_borrowers(search_term: str) -> list[BorrowerSearchResult]:
     if not search_term:
         return []
 
     sql = f"""
-    SELECT
-        b.Isbn as Isbn,
-        b.Title as Title,
-        GROUP_CONCAT(a.Name, ', ') as Authors,
-        CASE
-            WHEN l.Isbn IS NULL THEN 1
-            WHEN l.Date_in IS NULL THEN 0
-            ELSE 1
-        END as Status,
-        br.
-    FROM {BOOKS_TABLE_NAME} b
-    LEFT JOIN {BOOK_AUTHORS_TABLE_NAME} ba ON ba.Isbn = b.Isbn
-    LEFT JOIN {AUTHORS_TABLE_NAME} a ON a.Author_id = ba.Author_id
-    LEFT JOIN {BOOK_LOANS_TABLE_NAME} l ON b.Isbn = l.Isbn
-    WHERE b.Isbn LIKE ? COLLATE NOCASE
-       OR b.Title LIKE ? COLLATE NOCASE
-       OR a.Name LIKE ? COLLATE NOCASE
-    GROUP BY b.Isbn, b.Title, l.Isbn, l.Date_in
+        SELECT
+            b.Card_id,
+            b.Bname,
+            COUNT(
+                DISTINCT CASE
+                    WHEN l.Date_in IS NULL
+                    THEN l.Loan_id
+                END
+            ) as N_Active_loans,
+            COALESCE(SUM(
+                CASE
+                    WHEN l.Date_in IS NULL
+                    THEN f.Fine_amt - f.Paid
+                    ELSE 0
+                END
+            ), 0) as Outstanding_fines
+        FROM {BORROWERS_TABLE_NAME} b
+        LEFT JOIN {BOOK_LOANS_TABLE_NAME} l ON b.Card_id = l.Card_id
+        LEFT JOIN {FINES_TABLE_NAME} f ON l.Loan_id = f.Loan_id
+        WHERE LOWER(b.Bname) LIKE LOWER(?)
+           OR CAST(b.Card_id AS TEXT) LIKE ?
+        GROUP BY b.Card_id, b.Bname
+        ORDER BY b.Bname;
     """
-    params = [f"%{search_term}%" for _ in range(3)]
 
-    return query.get_all_or_none(sql, params)
+    params = [f"%{search_term}%" for _ in range(2)]
+
+    results = query.get_all_or_none(sql, params)
+
+    if not results:
+        return []
+
+    return [BorrowerSearchResult(**dict(result)) for result in results]
 
 def get_borrower_by_ssn(ssn: str) -> Optional[Borrower]:
     return _get_borrower("Ssn", ssn)
 
-def get_borrower_by_id(borrower_id: str) -> Optional[Borrower]:
-    return _get_borrower("Card_id", borrower_id)
+def get_borrower_by_id(borrower_id: int) -> Optional[Borrower]:
+    return _get_borrower("Card_id", str(borrower_id))
 
 def _get_borrower(column: str, param: str) -> Optional[Borrower]:
     sql = f"""
@@ -62,7 +71,12 @@ def _get_borrower(column: str, param: str) -> Optional[Borrower]:
     WHERE {column} = ?
     """
 
-    return query.get_one_or_none(sql, [param])
+    result = query.get_one_or_none(sql, [param])
+
+    if not result:
+        return None
+
+    return Borrower(**dict(result))
 
 def create_borrower(name: str, ssn: str, address: str) -> bool:
     borrower = db.get_borrower_by_ssn(ssn)

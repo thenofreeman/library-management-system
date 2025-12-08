@@ -1,0 +1,37 @@
+from datetime import date
+
+from pydantic import BaseModel, Field, ConfigDict
+
+class Author(BaseModel):
+    id: int = Field(alias='Author_id')
+    name: str = Field(alias='Name')
+
+    model_config = ConfigDict(populate_by_name=True)
+
+class Book(BaseModel):
+    isbn: str = Field(alias='Isbn')
+    title: str = Field(alias='Title')
+
+class BookAuthor(BaseModel):
+    author_id: int = Field(alias='Author_id')
+    isbn: str = Field(alias='Isbn')
+
+class Borrower(BaseModel):
+    id: int = Field(alias='Card_id')
+    ssn: str = Field(alias='Ssn')
+    name: str = Field(alias='Bname')
+    address: str = Field(alias='Address')
+    phone: str = Field(alias='Phone')
+
+class Loan(BaseModel):
+    id: int = Field(alias='Loan_id')
+    isbn: str = Field(alias='Isbn')
+    borrower_id: int = Field(alias='borrower_id')
+    date_out: date = Field(alias='Date_out')
+    date_in: date = Field(alias='Date_in')
+    due_date: date = Field(alias='Due_date')
+
+class Fine(BaseModel):
+    loan_id: int = Field(alias='Loan_id')
+    amt: int = Field(alias='Fine_amt') # in cents
+    paid: bool = Field(alias='Paid') # in cents
