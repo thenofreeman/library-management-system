@@ -32,9 +32,11 @@ class BorrowerDetailModal(BaseModal):
 
         checkouts_table.zebra_stripes = True
 
+        self.checkout_lookup = {}
         checkouts_table.add_columns(*["Loan ID", "ISBN", "Date Out", "In"])
         for loan in self.all_checkouts:
-            checkouts_table.add_row(loan.id, loan.isbn, loan.date_out, loan.date_in)
+            checkouts_table.add_row(loan.id, loan.isbn, loan.date_out, loan.date_in, key=str(loan.id))
+            self.checkout_lookup[loan.id] = loan
 
         if self.fines:
             fine_table = self.query_one("#fines-table", DataTable)
@@ -113,10 +115,8 @@ class BorrowerDetailModal(BaseModal):
         elif event.button.id == 'checkin-button':
             selection_list = self.query_one(SelectionList)
 
-            # TODO: FIX ERROR
             selected_items = [
-                self.active_checkouts[idx]
-                for idx in selection_list.selected
+                self.checkout_lookup[idx] for idx in selection_list.selected
             ]
 
             if selected_items:
