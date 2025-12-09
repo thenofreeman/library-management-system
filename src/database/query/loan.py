@@ -194,12 +194,9 @@ def checkin_many(loans: list[Loan]) -> OperationResult:
         if not success:
             isbns.append(loan.isbn)
 
-    if isbns:
-        isbn_str = ", ".join(isbns)
-
     return OperationResult(
         status=not isbns,
-        message="Books checked in successfully." if not isbns else f"Failed to check in: {isbns}.]"
+        message="Books checked in successfully." if not isbns else f"Failed to check in: {', '.join(isbns)}.]"
     )
 
 def checkin(loan_id: int) -> OperationResult:
