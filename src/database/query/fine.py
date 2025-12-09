@@ -1,7 +1,7 @@
 from typing import Optional
-from datetime import date, datetime
+from datetime import date, timedelta
 
-from database.dtypes import Fine
+from models import FineSearchResult
 from database.names import (
     FINES_TABLE_NAME,
     BOOK_LOANS_TABLE_NAME,
@@ -14,13 +14,17 @@ from . import query, metadata
 
 from logger import Logger
 
-def get_all_fines(paid: bool = False) -> Optional[list[Fine]]:
+def get_all_fines(paid: bool = False) -> list[FineSearchResult]:
     sql = f"""
     SELECT
         f.Loan_id,
-        f.Fine_amt,
         b.Isbn,
-        f.Paid
+        l.Card_id,
+        f.Fine_amt,
+        f.Paid,
+        l.Date_out,
+        l.Due_date,
+        l.Date_in
     FROM {FINES_TABLE_NAME} f
     JOIN {BOOK_LOANS_TABLE_NAME} l ON l.Loan_id = f.Loan_id
     JOIN {BOOKS_TABLE_NAME} b ON b.Isbn = l.Isbn
@@ -28,15 +32,24 @@ def get_all_fines(paid: bool = False) -> Optional[list[Fine]]:
     ORDER BY l.Date_out DESC
     """
 
-    return query.get_all_or_none(sql, [])
+    results = query.get_all_or_none(sql, [])
 
-def get_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> Optional[list[Fine]]:
+    if not results:
+        return []
+
+    return [FineSearchResult(**dict(result)) for result in results]
+
+def get_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> Optional[list[FineSearchResult]]:
     sql = f"""
     SELECT
         f.Loan_id,
-        f.Fine_amt,
         b.Isbn,
-        f.Paid
+        l.Card_id,
+        f.Fine_amt,
+        f.Paid,
+        l.Date_out,
+        l.Due_date,
+        l.Date_in
     FROM {FINES_TABLE_NAME} f
     JOIN {BOOK_LOANS_TABLE_NAME} l ON l.Loan_id = f.Loan_id
     JOIN {BOOKS_TABLE_NAME} b ON b.Isbn = l.Isbn
@@ -48,8 +61,8 @@ def get_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> Optional[l
 
     return query.get_all_or_none(sql, params)
 
-def set_fines_updated(date_str: str) -> bool:
-    return metadata.set_value('last_updated_fines', date_str)
+def set_fines_updated(value: date) -> bool:
+    return metadata.set_value('last_updated_fines', value.isoformat())
 
 def get_fines_last_updated() -> Optional[date]:
     result = metadata.get_value('last_updated_fines')
@@ -57,7 +70,7 @@ def get_fines_last_updated() -> Optional[date]:
     if not result:
         return None
 
-    return datetime.fromisoformat(result[0])
+    return date.fromisoformat(result)
 
 def pay_fines(borrower_id: int, amt: int) -> bool:
     borrower = db.get_borrower_by_id(borrower_id)
@@ -95,51 +108,68 @@ def resolve_fines(loan_ids: list[int]) -> bool:
 
 def update_fines() -> bool:
     last_update = db.get_fines_last_updated()
-    today = date.today()
+    today = db.get_current_date()
 
-    should_update = (last_update is None) or (last_update >= today)
+    print("TD", today)
+
+    if not today:
+        return False
+
+    should_update = (last_update is None) or (last_update <= today)
+
+    print("SU", last_update, today, last_update <= today)
 
     if not should_update:
         return True
 
-    books_out = db.get_all_fines(paid=True)
+    overdue_loans = db.get_all_loans(overdue=True)
 
-    if not books_out:
-        # no books out, already up to date
-        db.set_fines_updated(date.today().isoformat())
+    print("OUT", overdue_loans)
+
+    if not overdue_loans:
+        db.set_fines_updated(today)
         return True
 
     fines_to_update = []
 
-    for book in books_out:
-        start_date = book[4]
-        end_date = book[5] if book[5] else today
+    for loan in overdue_loans:
+        loan_id = loan.id
+        days_overdue = (today - loan.due_date).days
 
-        loan_id = book[4]
-        fine_amt = (start_date - end_date) * 0.25
+        fine_amt = days_overdue * 25
 
         fines_to_update.append((loan_id, fine_amt))
 
+    print("TU", fines_to_update)
+
     success = db.set_fines(fines_to_update)
 
+    print("SUC", success)
+
     if success:
-        db.set_fines_updated(date.today().isoformat())
+        db.set_fines_updated(today)
         return True
 
     return False
 
 def set_fines(fines: list[tuple]) -> bool:
     sql = f"""
-        UPDATE {FINES_TABLE_NAME}
-        SET Fine_amt = ?
-        WHERE Loan_id = ?
+        INSERT OR REPLACE INTO {FINES_TABLE_NAME} (
+            Loan_id,
+            Fine_amt,
+            Paid
+        ) VALUES (
+            ?,
+            ?,
+            0
+        )
     """
 
     if not fines:
         return True
 
-    (fines, loan_ids) = tuple(map(list, zip(*fines)))
+    params = fines
 
-    params = [(fines, loan_ids, )]
+    print(sql, params)
 
     return query.try_execute_many(sql, params)

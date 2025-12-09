@@ -1,10 +1,12 @@
 from typing import Optional
 
+from database.names import METADATA_TABLE_NAME
+
 from . import query
 
 def get_value(key: str) -> Optional[str]:
-    sql = """
-        SELECT value FROM metadata
+    sql = f"""
+        SELECT value FROM {METADATA_TABLE_NAME}
         WHERE key = ?
     """
 
@@ -13,11 +15,11 @@ def get_value(key: str) -> Optional[str]:
     if not result:
         return None
 
-    return str(result)
+    return str(result[0])
 
 def set_value(key: str, value: str) -> bool:
-    sql = """
-    INSERT OR REPLACE INTO metadata (
+    sql = f"""
+    INSERT OR REPLACE INTO {METADATA_TABLE_NAME} (
         key,
         value
     ) VALUES (

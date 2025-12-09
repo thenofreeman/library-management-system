@@ -1,7 +1,9 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
+
+import database as db
 
 class Author(BaseModel):
     id: int = Field(alias='Author_id')
@@ -30,10 +32,17 @@ class Loan(BaseModel):
     borrower_id: int = Field(alias='Card_id')
     title: str = Field(alias='Title')
     date_out: date = Field(alias='Date_out')
-    date_in: Optional[date] = Field(alias='Date_in')
     due_date: date = Field(alias='Due_date')
+    date_in: Optional[date] = Field(alias='Date_in')
+
+    @property
+    def is_overdue(self) -> bool:
+        not_returned = (self.date_in is None)
+        past_due = (db.get_current_date() > self.due_date)
+
+        return not_returned and past_due
 
 class Fine(BaseModel):
     loan_id: int = Field(alias='Loan_id')
     amt: int = Field(alias='Fine_amt') # in cents
-    paid: bool = Field(alias='Paid') # in cents
+    paid: bool = Field(alias='Paid')

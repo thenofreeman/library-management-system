@@ -12,6 +12,7 @@ project_root = Path(__file__).parent
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Library Management System.")
     parser.add_argument('-i', '--init', action='store_true', help='Specify to initialize the DB on startup.')
+    parser.add_argument('-t', '--resettime', action='store_true', help='Reset the time info for some reason.')
     parser.add_argument('-f', '--force', action='store_true', help='Force commands to execute (eg. force a re-init of the db).')
     parser.add_argument('-l', '--library', help='Pass a specific filename to be used for the database.')
     # parser.add_argument('-v', '--verbose', help='Show logs.')
@@ -23,6 +24,16 @@ def main() -> None:
         db_name = str(project_root / args.library)
 
     db_exists = db.exists(db_name)
+
+    if args.resettime:
+        if db_exists:
+            print("Resetting time info to today.")
+            db.config.set_db_name(db_name)
+            db.reset_time()
+        else:
+            print("You must first initialize a database.")
+            print("  Hint: Use the '--init' command line flag.")
+            exit(1)
 
     if args.init:
         if db_exists:

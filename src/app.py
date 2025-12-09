@@ -2,6 +2,8 @@ from textual.app import App
 
 from ui.screens import HomeScreen
 
+import database as db
+
 class LibraryApp(App):
     TITLE = "Library Management System"
     SUB_TITLE = ""
@@ -21,6 +23,9 @@ class LibraryApp(App):
     ]
 
     def on_mount(self) -> None:
-        self.push_screen(HomeScreen())
+        today = db.get_current_date()
+        db.update_fines()
+
+        self.push_screen(HomeScreen(today))
 
 app = LibraryApp()

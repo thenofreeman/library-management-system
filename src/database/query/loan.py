@@ -14,16 +14,15 @@ from . import query
 from logger import Logger
 
 def search_loans(isbn: str | None = None,
-                     borrower_id: str | None = None,
-                     name: str | None = None,
-                     returned: bool = False) -> list[Loan]:
+                 borrower_id: str | None = None,
+                 name: str | None = None,
+                 returned: bool = False) -> list[Loan]:
     sql = f"""
     SELECT
         l.Loan_id,
         l.Isbn,
-        b.Title,
-        br.Card_id,
         l.Card_id,
+        b.Title,
         l.Date_out,
         l.Due_date,
         l.Date_in
@@ -64,6 +63,9 @@ def search_loans(isbn: str | None = None,
         return []
 
     return [Loan(**dict(result)) for result in results]
+
+def get_all_loans(overdue: bool = False, returned: bool = False) -> list[Loan]:
+    return [loan for loan in db.search_loans(returned=returned) if not overdue or loan.is_overdue]
 
 def get_loans_by_borrower_id(borrower_id: int, returned: bool = False) -> list[Loan]:
     return db.search_loans(borrower_id=str(borrower_id), returned=returned)
@@ -127,8 +129,6 @@ def checkin_many(loans: list[Loan]) -> bool:
 
     for loan in loans:
         success = db.checkin(loan.id)
-
-        print(success, loan.id, 'tested')
 
         all_success = all_success and success
 

@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date
+from typing import Optional
 
 from textual import on
 from textual.app import ComposeResult
@@ -13,10 +14,10 @@ from ui.screens import BookSearchScreen, BorrowerSearchScreen
 class HomeScreen(Screen):
     SUB_TITLE = "Home"
 
-    def __init__(self, current_date: datetime | None = None) -> None:
+    def __init__(self, current_date: Optional[date] = None) -> None:
         super().__init__()
 
-        self.current_date = current_date or datetime.now()
+        self.current_date = current_date or date.today()
 
     def on_mount(self) -> None:
         pass
@@ -59,7 +60,7 @@ class HomeScreen(Screen):
         if should_quit:
             self.app.exit()
 
-    def handle_time_travel(self, new_date: datetime | None) -> None:
-        if new_date is not None:
+    def handle_time_travel(self, new_date: Optional[date]) -> None:
+        if new_date:
             self.current_date = new_date
             self.query_one("#time-travel-btn", Button).label = new_date.strftime("%m-%d-%Y")

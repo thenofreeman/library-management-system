@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import date
 
 from pydantic import BaseModel, Field, field_serializer, model_validator
 
@@ -45,3 +46,21 @@ class BorrowerSearchResult(BaseModel):
     name: str = Field(alias='Bname')
     active_loan_count: int = Field(alias='N_Active_loans')
     total_unpaid_fines: int = Field(alias='Outstanding_fines') # in cents
+
+    @field_serializer('total_unpaid_fines')
+    def serialize_fines(self, amt: int) -> str:
+        return f"${amt / 100:,.2f}"
+
+    @property
+    def amt_dollars(self) -> str:
+        return self.serialize_fines(self.total_unpaid_fines)
+
+class FineSearchResult(BaseModel):
+    loan_id: int = Field(alias='Loan_id')
+    isbn: str = Field(alias='Isbn')
+    borrower_id: int = Field(alias='Card_id')
+    amt: int = Field(alias='Fine_amt') # in cents
+    paid: bool = Field(alias='Paid')
+    date_out: date = Field(alias='Date_out')
+    due_date: date = Field(alias='Due_date')
+    date_in: Optional[date] = Field(alias='Date_in')

@@ -37,6 +37,7 @@ def try_execute_many(sql: str, params: list) -> bool:
         c.executemany(sql, params)
         conn.commit()
     except sqlite3.Error as e:
+        print(e)
         conn.rollback()
         success = False
 
@@ -54,6 +55,7 @@ def try_execute_one(sql: str, params: list) -> bool:
         c.execute(sql, params)
         conn.commit()
     except sqlite3.Error as e:
+        print(e)
         conn.rollback()
         success = False
 

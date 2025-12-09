@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
 from textual import on
 from textual.app import ComposeResult
@@ -7,9 +7,11 @@ from textual.widgets import Button, Label, Static
 
 from ui.custom import BaseModal
 
-class TimeTravelModal(BaseModal[datetime]):
+import database as db
 
-    def __init__(self, current_date: datetime) -> None:
+class TimeTravelModal(BaseModal[date]):
+
+    def __init__(self, current_date: date) -> None:
         super().__init__()
         self.active_date = current_date
         self.selected_date = self.active_date
@@ -52,7 +54,11 @@ class TimeTravelModal(BaseModal[datetime]):
         elif event.button.id == "confirm":
             self.active_date = self.selected_date
 
-            self.dismiss(self.active_date)
+            if db.set_current_date(self.active_date):
+                db.update_fines()
+                self.dismiss(self.active_date)
+            else:
+                self.dismiss()
 
         elif event.button.id == "cancel":
             self.dismiss(None)
