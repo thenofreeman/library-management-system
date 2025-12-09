@@ -30,8 +30,8 @@ def search_borrowers(search_term: str) -> list[BorrowerSearchResult]:
             ) as N_Active_loans,
             COALESCE(SUM(
                 CASE
-                    WHEN l.Date_in IS NULL
-                    THEN f.Fine_amt - f.Paid
+                    WHEN f.Paid = 0
+                    THEN f.Fine_amt
                     ELSE 0
                 END
             ), 0) as Outstanding_fines
