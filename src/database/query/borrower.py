@@ -81,21 +81,26 @@ def _get_borrower(column: str, param: str) -> Optional[Borrower]:
 
     return Borrower(**dict(result))
 
-def create_borrower(name: str, ssn: str, address: str) -> bool:
+def create_borrower(name: str, ssn: str, address: str, phone: str) -> bool:
     borrower = db.get_borrower_by_ssn(ssn)
 
     if borrower:
         Logger.error("Borrower already exists.")
         return False
 
+    if not (name or ssn or address or phone):
+        Logger.error("Missing details.")
+        return False
+
     sql = f"""
     INSERT INTO {BORROWERS_TABLE_NAME} (
         Bname,
         Ssn,
-        Address
-    ) VALUES (?, ?, ?)
+        Address,
+        Phone
+    ) VALUES (?, ?, ?, ?)
     """
 
-    params = [name, ssn, address]
+    params = [name, ssn, address, phone]
 
     return query.try_execute_one(sql, params)

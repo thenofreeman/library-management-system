@@ -4,6 +4,8 @@ from textual.containers import Container, Vertical, Horizontal
 from textual.widgets import Button, Input, Label, Static
 from ui.custom import BaseModal
 
+import database as db
+
 class CreateBorrowerModal(BaseModal):
 
     def compose(self) -> ComposeResult:
@@ -39,17 +41,10 @@ class CreateBorrowerModal(BaseModal):
             address = self.query_one("#address_input", Input).value
             phone = self.query_one("#phone_input", Input).value
 
-            data = {
-                "name": name,
-                "ssn": ssn,
-                "address": address,
-                "phone": phone
-            }
-
-            success = False # TODO: do something with the data
+            success = db.create_borrower(name, ssn, address, phone)
 
             if success:
-                self.dismiss(data)
+                self.dismiss()
 
         elif event.button.id == "cancel_btn":
-            self.dismiss(None)
+            self.dismiss()

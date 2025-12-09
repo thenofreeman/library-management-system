@@ -46,7 +46,7 @@ queries = {
             Ssn TEXT NOT NULL,
             Bname TEXT NOT NULL,
             Address TEXT NOT NULL,
-            Phone TEXT
+            Phone TEXT NOT NULL
         );
     """,
 
