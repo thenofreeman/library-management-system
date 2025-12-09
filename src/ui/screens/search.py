@@ -94,8 +94,6 @@ class SearchScreen(Screen):
 
         self.results = self.search_fn(value, self.filters)
 
-        print(self.results[0])
-
         if not self.results:
             self.update_result_count()
             return

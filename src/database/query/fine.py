@@ -90,9 +90,13 @@ def get_fines_last_updated() -> Optional[date]:
 def pay_fines(borrower_id: int, amt: int) -> bool:
     borrower = db.get_borrower_by_id(borrower_id)
 
+    print("start")
+
     if not borrower:
         Logger.error("Borrower doesn't exist.")
         return False
+
+    print(borrower)
 
     total_fines = db.get_total_fines_by_borrower_id(borrower.id)
 
@@ -100,12 +104,18 @@ def pay_fines(borrower_id: int, amt: int) -> bool:
         Logger.error("Borrower didn't pay enough fine.")
         return False
 
+    print(total_fines)
+
     fines = db.get_fines_by_borrower_id(borrower.id)
 
     if not fines:
         return False
 
+    print(fines)
+
     loan_ids = [fine.loan_id for fine in fines]
+
+    print(loan_ids)
 
     return db.resolve_fines(loan_ids)
 

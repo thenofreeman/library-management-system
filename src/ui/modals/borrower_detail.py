@@ -124,3 +124,10 @@ class BorrowerDetailModal(BaseModal):
 
                 if success:
                     self.dismiss()
+
+        elif event.button.id == 'pay-button':
+            if self.borrower_data:
+                success = db.pay_fines(self.borrower_data.id, self.total_fines)
+
+                if success:
+                    self.dismiss()
