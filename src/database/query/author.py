@@ -1,6 +1,6 @@
 from typing import Optional
 
-from database.dtypes import Author
+from models import Author
 from database.names import (
     AUTHORS_TABLE_NAME
 )
