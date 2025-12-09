@@ -148,6 +148,4 @@ def resolve_loan(loan_id: int) -> bool:
 
     params = [date_in, loan_id]
 
-    print(loan_id)
-
     return query.try_execute_one(sql, params)

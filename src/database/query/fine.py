@@ -110,21 +110,15 @@ def update_fines() -> bool:
     last_update = db.get_fines_last_updated()
     today = db.get_current_date()
 
-    print("TD", today)
-
     if not today:
         return False
 
     should_update = (last_update is None) or (last_update <= today)
 
-    print("SU", last_update, today, last_update <= today)
-
     if not should_update:
         return True
 
     overdue_loans = db.get_all_loans(overdue=True)
-
-    print("OUT", overdue_loans)
 
     if not overdue_loans:
         db.set_fines_updated(today)
@@ -140,11 +134,7 @@ def update_fines() -> bool:
 
         fines_to_update.append((loan_id, fine_amt))
 
-    print("TU", fines_to_update)
-
     success = db.set_fines(fines_to_update)
-
-    print("SUC", success)
 
     if success:
         db.set_fines_updated(today)
@@ -169,7 +159,5 @@ def set_fines(fines: list[tuple]) -> bool:
         return True
 
     params = fines
-
-    print(sql, params)
 
     return query.try_execute_many(sql, params)
