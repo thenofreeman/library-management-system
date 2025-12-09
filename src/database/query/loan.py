@@ -1,5 +1,4 @@
-from typing import Optional
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
 from database.names import (
     BOOK_LOANS_TABLE_NAME,
@@ -117,8 +116,10 @@ def create_loan(isbn: str, borrower_id: int) -> bool:
     ) VALUES (?, ?, ?, ?, NULL)
     """
 
-    date_out = datetime.now().strftime('%Y-%m-%d')
-    due_date = (datetime.today() + timedelta(days=14)).strftime('%Y-%m-%d')
+    today = db.get_current_date() or date.today()
+
+    date_out = today.isoformat()
+    due_date = (today + timedelta(days=14)).isoformat()
 
     params = [isbn, borrower_id, date_out, due_date]
 
