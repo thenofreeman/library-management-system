@@ -5,7 +5,7 @@ from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.validation import Length
 from textual.widgets import DataTable, Input, Button, Static
-from textual.containers import Container
+from textual.containers import Container, Horizontal
 
 from ui.components import NavbarComponent
 from ui.custom.base_modal import BaseModal
@@ -44,11 +44,13 @@ class SearchScreen(Screen):
         )
 
         with Container(classes="content"):
-            yield Input(
-                placeholder=self.placeholder,
-                type="text",
-                validators=[Length(minimum=1)]
-            )
+            with Horizontal(classes="side-by-side"):
+                yield Input(
+                    placeholder=self.placeholder,
+                    type="text",
+                    validators=[Length(minimum=1)]
+                )
+                yield Button("Search", variant="primary", id="do-search-btn")
             yield DataTable()
             yield Static("", id="result-count")
 
@@ -76,6 +78,10 @@ class SearchScreen(Screen):
                 FilterModal(self.filters),
                 self.handle_filter,
             )
+        elif event.button.id == "do-search-btn":
+            input_widget = self.query_one(Input)
+            if input_widget.is_valid:
+                self.handle_search(input_widget.value)
 
     @on(Input.Submitted)
     def handle_submit(self, event: Input.Submitted) -> None:
