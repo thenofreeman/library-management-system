@@ -8,6 +8,7 @@ from textual.widgets import DataTable, Input, Button, Static
 from textual.containers import Container
 
 from ui.components import NavbarComponent
+from ui.custom.base_modal import BaseModal
 from ui.modals import FilterModal
 
 class SearchScreen(Screen):
@@ -21,6 +22,7 @@ class SearchScreen(Screen):
         filters: Optional[dict] = None,
         placeholder: str = "Search...",
         on_detail_callback: Optional[Callable[[Any], None]] = None,
+        filter_modal: Optional[BaseModal] = None
     ):
         super().__init__()
 
@@ -31,17 +33,14 @@ class SearchScreen(Screen):
         self.placeholder = placeholder
         self.on_detail_callback = on_detail_callback
         self.filters = filters
+        self.right_button = filter_modal
 
         self.results = []
 
     def compose(self) -> ComposeResult:
-        right_button = (
-            Button("Filter", id="filter-btn", variant="primary") if self.filters else None
-        )
-
         yield NavbarComponent(
             left_button=Button("Back", id="back-btn", variant="error"),
-            right_button=right_button,
+            right_button=self.right_button if self.filters else None,
         )
 
         with Container(classes="content"):

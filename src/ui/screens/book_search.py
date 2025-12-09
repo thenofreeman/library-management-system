@@ -1,6 +1,6 @@
 from typing import Optional
 
-from textual.widgets import Input
+from textual.widgets import Input, Button
 
 from ui.screens import SearchScreen
 from ui.modals import BookDetailModal
@@ -31,7 +31,10 @@ class BookSearchScreen(SearchScreen):
             filters={
                 'columns': [('ISBN', True), ('Title', True), ('Authors', True)],
                 'availability': 'All',
-            }
+            },
+            filter_modal = (
+                Button("Filter", id="filter-btn", variant="primary")
+            )
         )
 
     def get_detail_data(self, row_data: BookSearchResult) -> BookSearchResult:
