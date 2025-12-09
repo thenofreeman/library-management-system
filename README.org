@@ -21,6 +21,8 @@ python3 --version
 
 It is recommended that you use a virtual environment before continuing. This project was built using `uv` as it handles most of the annoying project config, but any venv will work.
 
+You can [[https://docs.astral.sh/uv/getting-started/installation/][install uv here]].
+
 To setup a venv with `uv`:
 
 #+begin_src bash
