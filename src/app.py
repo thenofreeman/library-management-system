@@ -23,9 +23,14 @@ class LibraryApp(App):
     ]
 
     def on_mount(self) -> None:
+        db.config.set_db_name("library.db")
+
         today = db.get_current_date()
         db.update_fines()
 
         self.push_screen(HomeScreen(today))
 
 app = LibraryApp()
+
+if __name__ == '__main__':
+    app.run()

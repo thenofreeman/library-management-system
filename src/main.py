@@ -7,7 +7,7 @@ import database as db
 
 from app import app
 
-project_root = Path(__file__).parent
+project_root = Path(__file__)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Library Management System.")
@@ -66,7 +66,6 @@ def main() -> None:
         print("  Hint: Use the '--init' command line flag.")
         exit(1)
 
-    db.config.set_db_name(db_name)
     app.run()
 
 if __name__ == '__main__':
