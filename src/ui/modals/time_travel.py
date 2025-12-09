@@ -43,6 +43,8 @@ class TimeTravelModal(BaseModal[date]):
                 self.query_one("#date-display", Label).update(
                     self.selected_date.strftime("%m-%d-%Y")
                 )
+            else:
+                self.notify("You cannot move backwards in time.", severity="error")
 
         elif event.button.id == "date-next":
             self.selected_date += timedelta(days=1)
@@ -55,6 +57,7 @@ class TimeTravelModal(BaseModal[date]):
             self.active_date = self.selected_date
 
             if db.set_current_date(self.active_date):
+                self.notify("Updating fines to movement in time.", severity="information")
                 db.update_fines()
                 self.dismiss(self.active_date)
             else:

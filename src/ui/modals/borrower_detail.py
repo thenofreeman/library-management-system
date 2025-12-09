@@ -123,11 +123,19 @@ class BorrowerDetailModal(BaseModal):
                 success = db.checkin_many(selected_items)
 
                 if success:
+                    self.notify("Book checked in successfully!", severity="information")
                     self.dismiss()
+                else:
+                    self.notify("Unable to check in book.", severity="error")
+            else:
+                self.notify("You must make a selection.", severity="warning")
 
         elif event.button.id == 'pay-button':
             if self.borrower_data:
                 success = db.pay_fines(self.borrower_data.id, self.total_fines)
 
                 if success:
+                    self.notify("Fines paid successfully!", severity="information")
                     self.dismiss()
+                else:
+                    self.notify("Unable to pay fines.", severity="error")

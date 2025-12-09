@@ -44,7 +44,10 @@ class CreateBorrowerModal(BaseModal):
             success = db.create_borrower(name, ssn, address, phone)
 
             if success:
+                self.notify("Borrower created successfully!", severity="information")
                 self.dismiss()
+            else:
+                self.notify("Unable to create borrower.", severity="error")
 
         elif event.button.id == "cancel_btn":
             self.dismiss()

@@ -87,6 +87,8 @@ class SearchScreen(Screen):
     def handle_submit(self, event: Input.Submitted) -> None:
         if event.validation_result.is_valid:
             self.handle_search(event.value)
+        else:
+            self.notify("You must provide a search query.", severity='error')
 
     def handle_search(self, value: str) -> None:
         table = self.query_one(DataTable)
@@ -96,6 +98,7 @@ class SearchScreen(Screen):
 
         if not self.results:
             self.update_result_count()
+            self.notify("No results to display.", severity='warning')
             return
 
         self.result_lookup = {}

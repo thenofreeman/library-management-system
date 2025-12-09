@@ -28,9 +28,9 @@ class HomeScreen(Screen):
 
         with Container(classes="content"):
             with Grid(classes="menu-grid"):
-                yield Button("Search Books", id="search-books", classes="menu-btn", variant="primary")
-                yield Button("Search Borrowers", id="search-borrowers", classes="menu-btn", variant="primary")
-                yield Button("Create A Borrower", id="create-borrower", classes="menu-btn", variant="primary")
+                yield Button("Search Books", id="search-books", classes="menu-btn", variant="primary", disabled=db.is_initialized())
+                yield Button("Search Borrowers", id="search-borrowers", classes="menu-btn", variant="primary", disabled=db.is_initialized())
+                yield Button("Create A Borrower", id="create-borrower", classes="menu-btn", variant="primary", disabled=db.is_initialized())
                 yield Button("Settings", id="settings", classes="menu-btn", variant="primary")
 
         # Footer (empty for now)

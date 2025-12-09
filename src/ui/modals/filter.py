@@ -45,10 +45,7 @@ class FilterModal(BaseModal):
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "":
-            pass
-
-        elif event.button.id == "confirm":
+        if event.button.id == "confirm":
             self.filter_availability()
             self.filter_columns()
 

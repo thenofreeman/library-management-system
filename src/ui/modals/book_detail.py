@@ -108,23 +108,32 @@ class BookDetailModal(BaseModal):
         elif event.button.id == 'checkout-button':
             input = self.query_one(Input)
 
-            success = db.create_loan(self.book_data.isbn, input.value)
+            try:
+                success = db.create_loan(self.book_data.isbn, int(input.value))
+            except ValueError:
+                self.notify("You must provide a number.", severity="error")
+                success = False
 
             if success:
+                self.notify("Book successfully checked out!", severity="information")
                 self.dismiss()
             else:
-                pass # TODO show invalid or failed
+                self.notify("Unable to check out book.", severity="error")
 
         elif event.button.id == 'checkin-button':
             loan = None
+
             if self.book_data.borrower_id:
-                loan = db.get_loans_by_borrower_id(self.borrower_data.id)[0]
+                loan = db.get_loans_by_borrower_id(self.book_data.borrower_id)[0]
 
             if loan:
                 success = db.checkin(loan.id)
 
                 if success:
+                    self.notify("Book successfully checked in!", severity="information")
                     self.dismiss()
+                else:
+                    self.notify("Unable to check in book.", severity="error")
 
     @on(Tag.Clicked)
     def handle_tag_clicked(self, event: Tag.Clicked) -> None:
