@@ -54,7 +54,8 @@ class HomeScreen(Screen):
         elif event.button.id == "create-borrower":
             self.app.push_screen(CreateBorrowerModal())
         elif event.button.id == "settings":
-            self.app.push_screen(BookSearchScreen())
+            pass
+            # self.app.push_screen(BookSearchScreen())
 
     def handle_quit(self, should_quit: bool) -> None:
         if should_quit:
