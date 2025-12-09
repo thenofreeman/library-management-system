@@ -1,4 +1,5 @@
 
+from datetime import date
 from models.result import BorrowerSearchResult
 from textual import on
 from textual.app import ComposeResult
@@ -23,14 +24,31 @@ class BorrowerDetailModal(BaseModal):
             self.active_checkouts = db.get_loans_by_borrower_id(self.borrower_data.id, returned=False)
             self.all_checkouts = db.get_loans_by_borrower_id(self.borrower_data.id, returned=True)
 
+            self.fines = db.get_fines_by_borrower_id(self.borrower_data.id)
+            self.total_fines = db.get_total_fines_by_borrower_id(self.borrower_data.id)
+
     def on_mount(self) -> None:
-        table = self.query_one(DataTable)
+        checkouts_table = self.query_one("#checkouts-history", DataTable)
 
-        table.zebra_stripes = True
+        checkouts_table.zebra_stripes = True
 
-        table.add_columns(*["Loan", "ISBN", "Date Out", "In"])
+        checkouts_table.add_columns(*["Loan ID", "ISBN", "Date Out", "In"])
         for loan in self.all_checkouts:
-            table.add_row(loan.id, loan.isbn, loan.date_out, loan.date_in)
+            checkouts_table.add_row(loan.id, loan.isbn, loan.date_out, loan.date_in)
+
+        if self.fines:
+            fine_table = self.query_one("#fines-table", DataTable)
+
+            fine_table.zebra_stripes = True
+
+            fine_table.add_columns(*["Loan ID", "ISBN", "Days Overdue", "Amount"])
+            for fine in self.fines:
+                fine_table.add_row(
+                    fine.loan_id,
+                    fine.isbn,
+                    ((fine.date_in or db.get_current_date() or date.today()) - fine.due_date).days,
+                    fine.amt_dollars
+                )
 
     def compose(self) -> ComposeResult:
         with Container(id="modal-container"):
@@ -52,15 +70,16 @@ class BorrowerDetailModal(BaseModal):
                         with TabPane("Manage"):
                             with Vertical():
                                 with Vertical(classes="input-field"):
-                                    yield Label("Active Checkouts")
-
                                     if not self.active_checkouts:
                                         yield Label("No Checkouts")
                                     else:
+                                        yield Label("Active Checkouts")
+
                                         yield SelectionList[int](
-                                            *[(f"[{loan.isbn}] {loan.title}",
-                                            loan.id,
-                                            bool(loan.date_in)
+                                            *[(
+                                                f"[{loan.isbn}] {loan.title}",
+                                                loan.id,
+                                                bool(loan.date_in)
                                             ) for loan in self.active_checkouts],
                                             compact=True,
                                             id="searched-columns"
@@ -68,11 +87,19 @@ class BorrowerDetailModal(BaseModal):
 
                                         yield Button("Check-in Books", id="checkin-button", variant="primary")
 
+                                    if not self.fines:
+                                        yield Label("No Fines")
+                                    else:
+                                        yield Label("Fines")
+
+                                        yield DataTable(id="fines-table")
+
+                                        yield Label(f"Total: ${self.total_fines / 100:,.2f} owed")
+                                        yield Button("Pay", id="pay-button", variant="primary")
+
                         with TabPane("Checkout History"):
                             with Vertical():
-                                yield DataTable(
-
-                                )
+                                yield DataTable(id="checkouts-history")
                                 yield Static("", id="result-count")
 
                 with Horizontal(classes="form-buttons"):
@@ -86,8 +113,9 @@ class BorrowerDetailModal(BaseModal):
         elif event.button.id == 'checkin-button':
             selection_list = self.query_one(SelectionList)
 
+            # TODO: FIX ERROR
             selected_items = [
-                self.active_checkouts[idx-1]
+                self.active_checkouts[idx]
                 for idx in selection_list.selected
             ]
 

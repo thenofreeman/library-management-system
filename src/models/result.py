@@ -64,3 +64,11 @@ class FineSearchResult(BaseModel):
     date_out: date = Field(alias='Date_out')
     due_date: date = Field(alias='Due_date')
     date_in: Optional[date] = Field(alias='Date_in')
+
+    @field_serializer('amt')
+    def serialize_amt(self, amt: int) -> str:
+        return f"${amt / 100:,.2f}" if amt > 0 else ""
+
+    @property
+    def amt_dollars(self) -> str:
+        return self.serialize_amt(self.amt)

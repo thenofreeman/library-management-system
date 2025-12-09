@@ -39,7 +39,7 @@ def get_all_fines(paid: bool = False) -> list[FineSearchResult]:
 
     return [FineSearchResult(**dict(result)) for result in results]
 
-def get_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> Optional[list[FineSearchResult]]:
+def get_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> list[FineSearchResult]:
     sql = f"""
     SELECT
         f.Loan_id,
@@ -59,7 +59,22 @@ def get_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> Optional[l
 
     params = [borrower_id] if borrower_id else []
 
-    return query.get_all_or_none(sql, params)
+    results =  query.get_all_or_none(sql, params)
+
+    if not results:
+        return []
+
+    return [FineSearchResult(**dict(result)) for result in results]
+
+def get_total_fines_by_borrower_id(borrower_id: int, paid: bool = False) -> int:
+    fines = db.get_fines_by_borrower_id(borrower_id, paid=paid)
+
+    if not fines:
+        return 0
+
+    total_fines = sum(fine.amt for fine in fines)
+
+    return total_fines
 
 def set_fines_updated(value: date) -> bool:
     return metadata.set_value('last_updated_fines', value.isoformat())
@@ -79,19 +94,18 @@ def pay_fines(borrower_id: int, amt: int) -> bool:
         Logger.error("Borrower doesn't exist.")
         return False
 
-    fines = db.get_fines_by_borrower_id(borrower_id)
-
-    if not fines:
-        # no fines to pay
-        return True
-
-    total_fines = sum(fine[1] for fine in fines)
+    total_fines = db.get_total_fines_by_borrower_id(borrower.id)
 
     if amt < total_fines:
         Logger.error("Borrower didn't pay enough fine.")
         return False
 
-    loan_ids = [fine[0] for fine in fines]
+    fines = db.get_fines_by_borrower_id(borrower.id)
+
+    if not fines:
+        return False
+
+    loan_ids = [fine.loan_id for fine in fines]
 
     return db.resolve_fines(loan_ids)
 
