@@ -36,18 +36,18 @@ class CreateBorrowerModal(BaseModal):
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "submit_btn":
-            name = self.query_one("#name_input", Input).value
-            ssn = self.query_one("#ssn_input", Input).value
-            address = self.query_one("#address_input", Input).value
-            phone = self.query_one("#phone_input", Input).value
+            name = self.query_one("#name_input", Input).value.strip()
+            ssn = self.query_one("#ssn_input", Input).value.strip()
+            address = self.query_one("#address_input", Input).value.strip()
+            phone = self.query_one("#phone_input", Input).value.strip()
 
-            success = db.create_borrower(name, ssn, address, phone)
+            result = db.create_borrower(name, ssn, address, phone)
 
-            if success:
-                self.notify("Borrower created successfully!", severity="information")
+            if result.status:
+                self.notify(result.message, severity="information")
                 self.dismiss()
             else:
-                self.notify("Unable to create borrower.", severity="error")
+                self.notify(result.message, severity="error")
 
         elif event.button.id == "cancel_btn":
             self.dismiss()

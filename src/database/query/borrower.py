@@ -9,6 +9,7 @@ from database.names import (
 )
 
 import database as db
+from models.result import OperationResult
 
 from . import query
 
@@ -81,16 +82,42 @@ def _get_borrower(column: str, param: str) -> Optional[Borrower]:
 
     return Borrower(**dict(result))
 
-def create_borrower(name: str, ssn: str, address: str, phone: str) -> bool:
+def create_borrower(name: str, ssn: str, address: str, phone: str) -> OperationResult:
+    if not (name and ssn and address and phone):
+        missing_fields = []
+        if not name: missing_fields.append("Name")
+        if not ssn: missing_fields.append("SSN")
+        if not address: missing_fields.append("Address")
+        if not phone: missing_fields.append("Phone")
+
+        return OperationResult(
+            status=False,
+            message=f"Missing field(s): {', '.join(missing_fields)}"
+        )
+
+    ssn = ssn.replace('-', '')
+
+    if not ssn.isnumeric() or len(ssn) != 9:
+        return OperationResult(
+            status=False,
+            message="Not a valid SSN."
+        )
+
+    phone = phone.replace('(', '').replace(')', '').replace('-','').replace(' ', '')
+
+    if not phone.isnumeric() or len(phone) != 10:
+        return OperationResult(
+            status=False,
+            message="Not a valid Phone Number."
+        )
+
     borrower = db.get_borrower_by_ssn(ssn)
 
     if borrower:
-        Logger.error("Borrower already exists.")
-        return False
-
-    if not (name or ssn or address or phone):
-        Logger.error("Missing details.")
-        return False
+        return OperationResult(
+            status=False,
+            message="Borrower with this SSN already exists."
+        )
 
     sql = f"""
     INSERT INTO {BORROWERS_TABLE_NAME} (
@@ -103,4 +130,7 @@ def create_borrower(name: str, ssn: str, address: str, phone: str) -> bool:
 
     params = [name, ssn, address, phone]
 
-    return query.try_execute_one(sql, params)
+    return OperationResult(
+        status=query.try_execute_one(sql, params),
+        message="Borrower created successfuly!"
+    )
