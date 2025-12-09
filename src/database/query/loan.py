@@ -144,7 +144,7 @@ def resolve_loan(loan_id: int) -> bool:
         WHERE Loan_id = ?
     """
 
-    date_in = datetime.now().strftime('%Y-%m-%d')
+    date_in = db.get_current_date()
 
     params = [date_in, loan_id]
 
