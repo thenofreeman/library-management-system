@@ -55,6 +55,16 @@ This creates a database file called ~library.db~, which we will query with sqlit
 
 ** Normal Operation
 
+Start the app with:
+
+#+begin_src bash
+uv run textual run main.py
+# to run with flags:
+# uv run textual run main.py --init
+#+end_src
+
+If the textual command isn't found, just run it as a normal python file (not recommended).
+
 #+begin_src bash
 python3 main.py
 #+end_src
@@ -62,7 +72,7 @@ python3 main.py
 It should open up a GUI/TUI in your terminal. To run it in the brower:
 
 #+begin_src bash
-textual serve main.py
+uv run textual serve main.py
 #+end_src
 
 and open the corresponding port in your browser.
