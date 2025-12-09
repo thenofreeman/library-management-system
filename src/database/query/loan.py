@@ -67,10 +67,58 @@ def get_all_loans(overdue: bool = False, returned: bool = False) -> list[Loan]:
     return [loan for loan in db.search_loans(returned=returned) if not overdue or loan.is_overdue]
 
 def get_loans_by_borrower_id(borrower_id: int, returned: bool = False) -> list[Loan]:
-    return db.search_loans(borrower_id=str(borrower_id), returned=returned)
+    sql = f"""
+    SELECT
+        l.Loan_id,
+        l.Isbn,
+        l.Card_id,
+        b.Title,
+        l.Date_out,
+        l.Due_date,
+        l.Date_in
+    FROM BOOK_LOANS l
+    JOIN BOOK b ON b.Isbn = l.Isbn
+    WHERE l.Card_id = ?
+    """
+    
+    if not returned:
+        sql += " AND l.Date_in IS NULL"
+    
+    sql += " ORDER BY l.Date_out DESC"
+    
+    results = query.get_all_or_none(sql, [borrower_id])
+    
+    if not results:
+        return []
+    
+    return [Loan(**dict(result)) for result in results]
 
 def get_loans_by_isbn(isbn: str, returned: bool = False) -> list[Loan]:
-    return db.search_loans(isbn=isbn, returned=returned)
+    sql = f"""
+    SELECT
+        l.Loan_id,
+        l.Isbn,
+        l.Card_id,
+        b.Title,
+        l.Date_out,
+        l.Due_date,
+        l.Date_in
+    FROM BOOK_LOANS l
+    JOIN BOOK b ON b.Isbn = l.Isbn
+    WHERE l.Isbn = ?
+    """
+    
+    if not returned:
+        sql += " AND l.Date_in IS NULL"
+    
+    sql += " ORDER BY l.Date_out DESC"
+    
+    results = query.get_all_or_none(sql, [isbn])
+    
+    if not results:
+        return []
+    
+    return [Loan(**dict(result)) for result in results]
 
 def checkout(isbn: str, borrower_id: int) -> bool:
     return db.create_loan(isbn, borrower_id)
