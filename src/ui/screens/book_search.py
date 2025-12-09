@@ -37,6 +37,9 @@ class BookSearchScreen(SearchScreen):
     def get_detail_data(self, row_data: BookSearchResult) -> BookSearchResult:
         return row_data
 
+    def get_key(self, data: BookSearchResult) -> str:
+        return data.isbn
+
     def handle_response(self, new_query: str | None) -> None:
         input = self.query_one(Input)
 

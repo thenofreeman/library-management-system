@@ -97,8 +97,8 @@ class SearchScreen(Screen):
 
         self.result_lookup = {}
         for row_data in self.results:
-            row_key = table.add_row(*row_data.model_dump().values(), key=row_data.isbn)
-            self.result_lookup[row_data.isbn] = row_data
+            row_key = table.add_row(*row_data.model_dump().values(), key=self.get_key(row_data))
+            self.result_lookup[self.get_key(row_data)] = row_data
 
         self.update_result_count()
 

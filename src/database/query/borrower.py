@@ -41,7 +41,7 @@ def search_borrowers(search_term: str) -> list[BorrowerSearchResult]:
         WHERE LOWER(b.Bname) LIKE LOWER(?)
            OR CAST(b.Card_id AS TEXT) LIKE ?
         GROUP BY b.Card_id, b.Bname
-        ORDER BY b.Bname;
+        ORDER BY b.Card_id;
     """
 
     params = [f"%{search_term}%" for _ in range(2)]

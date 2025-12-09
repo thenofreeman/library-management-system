@@ -35,6 +35,9 @@ class BorrowerSearchScreen(SearchScreen):
     def get_detail_data(self, row_data: tuple) -> BorrowerSearchResult:
         return row_data
 
+    def get_key(self, data: BorrowerSearchResult) -> int:
+        return data.id
+
     def handle_response(self, new_query: str | None) -> None:
         input = self.query_one(Input)
 
