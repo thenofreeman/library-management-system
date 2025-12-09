@@ -22,3 +22,11 @@ def reset_time() -> bool:
     db.update_fines()
 
     return True
+
+def is_initialized() -> bool:
+    ii = db.get_value('is_initialized')
+
+    return bool(ii)
+
+def set_initialized() -> bool:
+    return db.set_value('is_initialized', "1")

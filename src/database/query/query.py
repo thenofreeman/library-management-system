@@ -8,8 +8,13 @@ def get_one_or_none(sql: str, params: list) -> Optional[Any]:
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
-    c.execute(sql, params)
-    result = c.fetchone()
+    try:
+        c.execute(sql, params)
+        result = c.fetchone()
+    except sqlite3.Error as e:
+        print(e)
+        conn.close()
+        return None
 
     conn.close()
 
@@ -20,8 +25,13 @@ def get_all_or_none(sql: str, params: list) -> Optional[list]:
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
-    c.execute(sql, params)
-    result = c.fetchall()
+    try:
+        c.execute(sql, params)
+        result = c.fetchall()
+    except sqlite3.Error as e:
+        print(e)
+        conn.close()
+        return None
 
     conn.close()
 

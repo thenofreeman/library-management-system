@@ -58,8 +58,8 @@ def main() -> None:
             exit(1)
 
         if args.testdata:
-            pass # TODO: make the test data loaer
             print(f"Loading additional data for testing.")
+            success = db.load_additional_test_data(db_name)
 
     if not db_exists:
         print("You must first initialize a database.")

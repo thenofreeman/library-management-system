@@ -1,4 +1,5 @@
 from .initialize import *
+from .import_data import load_additional_test_data
 
 from database.query.author import *
 from database.query.book import *

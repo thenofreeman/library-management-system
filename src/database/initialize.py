@@ -13,6 +13,8 @@ from database import schema, config
 
 from database.import_data import from_csv
 
+import database as db
+
 def init(db_name: str) -> bool:
     config.set_db_name(db_name)
 
@@ -25,6 +27,10 @@ def init(db_name: str) -> bool:
 
     if not created:
         return False
+
+    print(db_name)
+
+    db.set_initialized()
 
     return _insert_data(data)
 

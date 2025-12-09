@@ -83,3 +83,7 @@ def _read_books() -> Optional[tuple[StringMatrix, StringMatrix, StringMatrix]]:
         return None
 
     return (books_data, book_authors_data, authors_data)
+
+def load_additional_test_data(db_name: str) -> bool:
+    # TODO: ...
+    return False

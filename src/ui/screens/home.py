@@ -8,19 +8,17 @@ from textual.widgets import Button
 from textual.containers import Container, Grid
 
 from ui.components.navbar import NavbarComponent
-from ui.modals import QuitModal, TimeTravelModal, CreateBorrowerModal
+from ui.modals import QuitModal, TimeTravelModal, CreateBorrowerModal, SettingsModal
 from ui.screens import BookSearchScreen, BorrowerSearchScreen
+
+import database as db
 
 class HomeScreen(Screen):
     SUB_TITLE = "Home"
 
     def __init__(self, current_date: Optional[date] = None) -> None:
         super().__init__()
-
         self.current_date = current_date or date.today()
-
-    def on_mount(self) -> None:
-        pass
 
     def compose(self) -> ComposeResult:
         yield NavbarComponent(
@@ -38,6 +36,16 @@ class HomeScreen(Screen):
         # Footer (empty for now)
         yield Container(classes="footer")
 
+    def on_screen_resume(self) -> None:
+        self.refresh_data()
+
+    def refresh_data(self) -> None:
+        self.current_date = db.get_current_date() or date.today()
+
+        nav = self.query_one(NavbarComponent)
+        ttb = nav.query_one('#time-travel-btn', Button)
+        ttb.label = self.current_date.strftime("%m-%d-%Y")
+
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "quit-btn":
@@ -54,8 +62,7 @@ class HomeScreen(Screen):
         elif event.button.id == "create-borrower":
             self.app.push_screen(CreateBorrowerModal())
         elif event.button.id == "settings":
-            pass
-            # self.app.push_screen(BookSearchScreen())
+            self.app.push_screen(SettingsModal())
 
     def handle_quit(self, should_quit: bool) -> None:
         if should_quit:
