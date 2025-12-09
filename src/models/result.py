@@ -49,7 +49,7 @@ class BorrowerSearchResult(BaseModel):
 
     @field_serializer('total_unpaid_fines')
     def serialize_fines(self, amt: int) -> str:
-        return f"${amt / 100:,.2f}"
+        return f"${amt / 100:,.2f}" if amt > 0 else ""
 
     @property
     def amt_dollars(self) -> str:
