@@ -19,19 +19,39 @@ python3 --version
 
 ** Dependencies
 
-No additonal dependencies are needed. We are using SQLite as our database, which comes nicely with the standard library.
+It is recommended that you use a virtual environment before continuing. This project was built using `uv` as it handles most of the annoying project config, but any venv will work.
+
+To setup a venv with `uv`:
+
+#+begin_src bash
+uv venv
+#+end_src
+
+Remember to activate the venv afterwards using the command it spits back at you. On Linux this is simply:
+
+#+begin_src bash
+source .venv/bin/active
+#+end_src
+
+Install the project requirements:
+
+#+begin_src bash
+uv pip install -r requirements.txt
+#+end_src
+
+And you are ready to go.
 
 * Running the Project
 
 ** First Run
 
-On your first run, you'll have to initialize the database:
+On your first run, you should initialize the database:
 
 #+begin_src bash
 python3 main.py --init
 #+end_src
 
-This creates a database file called ~library.db~, which we will query with sqlite.
+This creates a database file called ~library.db~, which we will query with sqlite. There is a way to do this from the in-app settings, but this quicker on first run.
 
 ** Normal Operation
 
@@ -39,11 +59,17 @@ This creates a database file called ~library.db~, which we will query with sqlit
 python3 main.py
 #+end_src
 
-A simple cli menu is displayed for testing this non-gui portion of the project.
+It should open up a GUI/TUI in your terminal. To run it in the brower:
+
+#+begin_src bash
+textual serve main.py
+#+end_src
+
+and open the corresponding port in your browser.
 
 ** Resetting Progress
 
-To run the initialization step AND DELETE THE CURRENT DB (eg. to start fresh), pass ~--init -f~ to force initialization.
+To run the initialization step AND DELETE THE CURRENT DB (eg. to start fresh), pass ~--init -f~ to force initialization. Or, alternatively, do this from the settings menu in-app.
 
 #+begin_src bash
 python3 main.py --init -f
