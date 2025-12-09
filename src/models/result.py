@@ -1,18 +1,11 @@
 from typing import TypeVar, Generic, Optional
 from datetime import date
-from enum import Enum
 
 from pydantic import BaseModel, Field, field_serializer, model_validator
 
-class OperationStatus(Enum):
-    SUCCESS = "success"
-    VALIDATION_ERROR = "validation_error"
-    DB_ERROR = "db_error"
-    NOT_FOUND = "not_found"
-
 T = TypeVar('T')
 class OperationResult(BaseModel, Generic[T]):
-    status: OperationStatus
+    status: bool
     message: str
     data: Optional[T] = None
 

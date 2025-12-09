@@ -120,13 +120,13 @@ class BorrowerDetailModal(BaseModal):
             ]
 
             if selected_items:
-                success = db.checkin_many(selected_items)
+                result = db.checkin_many(selected_items)
 
-                if success:
-                    self.notify("Book checked in successfully!", severity="information")
+                if result.status:
+                    self.notify(result.message, severity="information")
                     self.dismiss()
                 else:
-                    self.notify("Unable to check in book.", severity="error")
+                    self.notify(result.message, severity="error")
             else:
                 self.notify("You must make a selection.", severity="warning")
 

@@ -7,10 +7,9 @@ from database.names import (
 from models import Loan
 
 import database as db
+from models.result import OperationResult
 
 from . import query
-
-from logger import Logger
 
 def search_loans(isbn: str | None = None,
                  borrower_id: str | None = None,
@@ -120,39 +119,49 @@ def get_loans_by_isbn(isbn: str, returned: bool = False) -> list[Loan]:
     
     return [Loan(**dict(result)) for result in results]
 
-def checkout(isbn: str, borrower_id: int) -> bool:
+def checkout(isbn: str, borrower_id: int) -> OperationResult:
     return db.create_loan(isbn, borrower_id)
 
-def create_loan(isbn: str, borrower_id: int) -> bool:
+def create_loan(isbn: str, borrower_id: int) -> OperationResult:
     borrower = db.get_borrower_by_id(borrower_id)
 
     if not borrower:
-        Logger.error("Borrower doesn't exist.")
-        return False
+        return OperationResult(
+            status=False,
+            message="Book not found"
+        )
 
-    checkouts = db.get_loans_by_borrower_id(borrower_id)
+    checkouts = db.get_loans_by_borrower_id(borrower_id, returned=False)
 
     if checkouts and len(checkouts) >= 3:
-        Logger.error("Too many checkouts.")
-        return False
+        return OperationResult(
+            status=False,
+            message="Too many checkouts"
+        )
 
     book = db.get_book_by_isbn(isbn)
 
     if not book:
-        Logger.error("Book doesn't exist.")
-        return False
+        return OperationResult(
+            status=False,
+            message="Book doesn't exist"
+        )
 
     book_available = db.book_available_with_isbn(isbn)
 
     if not book_available:
-        Logger.error("Book already checked out.")
-        return False
+        return OperationResult(
+            status=False,
+            message="Book already checked out."
+        )
 
     borrowers_fines = db.get_fines_by_borrower_id(borrower_id)
 
     if borrowers_fines and len(borrowers_fines) > 0:
-        Logger.error("Borrower has pending fines.")
-        return False
+        return OperationResult(
+            status=False,
+            message="Borrower has pending fines."
+        )
 
     sql = f"""
     INSERT INTO {BOOK_LOANS_TABLE_NAME} (
@@ -171,22 +180,32 @@ def create_loan(isbn: str, borrower_id: int) -> bool:
 
     params = [isbn, borrower_id, date_out, due_date]
 
-    return query.try_execute_one(sql, params)
+    return OperationResult(
+        status=query.try_execute_one(sql, params),
+        message="Book successfully checked out!"
+    )
 
-def checkin_many(loans: list[Loan]) -> bool:
-    all_success = True
+def checkin_many(loans: list[Loan]) -> OperationResult:
+    isbns=[]
 
     for loan in loans:
-        success = db.checkin(loan.id)
+        success = db.checkin(loan.id).status
 
-        all_success = all_success and success
+        if not success:
+            isbns.append(loan.isbn)
 
-    return all_success
+    if isbns:
+        isbn_str = ", ".join(isbns)
 
-def checkin(loan_id: int) -> bool:
+    return OperationResult(
+        status=not isbns,
+        message="Books checked in successfully." if not isbns else f"Failed to check in: {isbns}.]"
+    )
+
+def checkin(loan_id: int) -> OperationResult:
     return db.resolve_loan(loan_id)
 
-def resolve_loan(loan_id: int) -> bool:
+def resolve_loan(loan_id: int) -> OperationResult:
     sql = f"""
         UPDATE {BOOK_LOANS_TABLE_NAME}
         SET Date_in = ?
@@ -197,4 +216,9 @@ def resolve_loan(loan_id: int) -> bool:
 
     params = [date_in, loan_id]
 
-    return query.try_execute_one(sql, params)
+    success = query.try_execute_one(sql, params)
+
+    return OperationResult(
+        status=success,
+        message="Book check in successfully."
+    )
