@@ -1,3 +1,4 @@
+from datetime import date
 from textual.app import App
 
 from ui.screens import HomeScreen
@@ -25,10 +26,12 @@ class LibraryApp(App):
     def on_mount(self) -> None:
         db.config.set_db_name("library.db")
 
-        today = db.get_current_date()
-        db.update_fines()
+        today = None
+        if db.exists(db.config.db_name) and db.is_initialized():
+            today = db.get_current_date()
+            db.update_fines()
 
-        self.push_screen(HomeScreen(today))
+        self.push_screen(HomeScreen(today or date.today()))
 
 app = LibraryApp()
 

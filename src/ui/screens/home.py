@@ -28,9 +28,9 @@ class HomeScreen(Screen):
 
         with Container(classes="content"):
             with Grid(classes="menu-grid"):
-                yield Button("Search Books", id="search-books", classes="menu-btn", variant="primary", disabled=db.is_initialized())
-                yield Button("Search Borrowers", id="search-borrowers", classes="menu-btn", variant="primary", disabled=db.is_initialized())
-                yield Button("Create A Borrower", id="create-borrower", classes="menu-btn", variant="primary", disabled=db.is_initialized())
+                yield Button("Search Books", id="search-books", classes="menu-btn", variant="primary", disabled=(not db.is_initialized()))
+                yield Button("Search Borrowers", id="search-borrowers", classes="menu-btn", variant="primary", disabled=(not db.is_initialized()))
+                yield Button("Create A Borrower", id="create-borrower", classes="menu-btn", variant="primary", disabled=(not db.is_initialized()))
                 yield Button("Settings", id="settings", classes="menu-btn", variant="primary")
 
         # Footer (empty for now)
@@ -45,6 +45,12 @@ class HomeScreen(Screen):
         nav = self.query_one(NavbarComponent)
         ttb = nav.query_one('#time-travel-btn', Button)
         ttb.label = self.current_date.strftime("%m-%d-%Y")
+
+        menubtns = self.query(".menu-btn")
+        for btn in menubtns:
+            if btn.id == "settings":
+                continue
+            btn.disabled = not db.is_initialized()
 
     @on(Button.Pressed)
     def handle_button_pressed(self, event: Button.Pressed) -> None:
