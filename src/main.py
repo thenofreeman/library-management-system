@@ -12,9 +12,10 @@ project_root = Path(__file__).parent
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Library Management System.")
     parser.add_argument('-i', '--init', action='store_true', help='Specify to initialize the DB on startup.')
-    parser.add_argument('-t', '--resettime', action='store_true', help='Reset the time info for some reason.')
+    parser.add_argument('-r', '--resettime', action='store_true', help='Reset the time info for some reason.')
     parser.add_argument('-f', '--force', action='store_true', help='Force commands to execute (eg. force a re-init of the db).')
     parser.add_argument('-l', '--library', help='Pass a specific filename to be used for the database.')
+    parser.add_argument('-t', '--testdata', help='Loads /additonal/ test data into the database if init is also passed.')
     # parser.add_argument('-v', '--verbose', help='Show logs.')
     args = parser.parse_args()
 
@@ -55,6 +56,10 @@ def main() -> None:
         else:
             print(f"Failed to initialize the database at '{db_name}'.")
             exit(1)
+
+        if args.testdata:
+            pass # TODO: make the test data loaer
+            print(f"Loading additional data for testing.")
 
     if not db_exists:
         print("You must first initialize a database.")
