@@ -13,7 +13,7 @@ class BookSearchScreen(SearchScreen):
 
     def __init__(self):
         def book_search(query: str, filters: Optional[dict]) -> list[BookSearchResult]:
-            return db.search_books(query)
+            return db.search_books(query, filters)
 
         super().__init__(
             title="Book Search",

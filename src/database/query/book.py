@@ -12,7 +12,7 @@ from models import BookSearchResult
 
 from . import query
 
-def search_books(search_term: str) -> list[BookSearchResult]:
+def search_books(search_term: str, filters: Optional[dict] = None) -> list[BookSearchResult]:
     if not search_term:
         return []
 
@@ -33,17 +33,48 @@ def search_books(search_term: str) -> list[BookSearchResult]:
     LEFT JOIN {BOOK_LOANS_TABLE_NAME} l ON b.Isbn = l.Isbn AND l.Date_in IS NULL
     LEFT JOIN {BORROWERS_TABLE_NAME} br ON br.Card_id = l.Card_id
     GROUP BY b.Isbn
-    HAVING b.Isbn LIKE ? COLLATE NOCASE
-       OR b.Title LIKE ? COLLATE NOCASE
-       OR Author_names LIKE ? COLLATE NOCASE
-    """
-    params = [f"%{search_term}%" for _ in range(3)]
-
+    HAVING ("""
+    
+    # Build search conditions based on column filters
+    search_conditions = []
+    params = []
+    
+    if filters and 'columns' in filters:
+        column_map = {
+            'ISBN': 'b.Isbn',
+            'Title': 'b.Title',
+            'Authors': 'Author_names'
+        }
+        
+        for column_name, is_enabled in filters['columns']:
+            if is_enabled and column_name in column_map:
+                search_conditions.append(f"{column_map[column_name]} LIKE ? COLLATE NOCASE")
+                params.append(f"%{search_term}%")
+    else:
+        # Default: search all columns
+        search_conditions = [
+            "b.Isbn LIKE ? COLLATE NOCASE",
+            "b.Title LIKE ? COLLATE NOCASE",
+            "Author_names LIKE ? COLLATE NOCASE"
+        ]
+        params = [f"%{search_term}%" for _ in range(3)]
+    
+    sql += " OR ".join(search_conditions) + ")"
+    
+    # Add availability filter in SQL
+    if filters and 'availability' in filters:
+        availability = filters['availability']
+        if availability == 'Available':
+            sql += " AND (CASE WHEN l.Isbn IS NOT NULL THEN 0 ELSE 1 END) = 1"
+        elif availability == 'Unavailable':
+            sql += " AND (CASE WHEN l.Isbn IS NOT NULL THEN 0 ELSE 1 END) = 0"
+        # 'All' means no additional filter
+    
     results = query.get_all_or_none(sql, params)
 
     if not results:
         return []
-
+    
     return [BookSearchResult(**dict(result)) for result in results]
 
 def get_book_by_isbn(isbn: str) -> Optional[BookSearchResult]:
