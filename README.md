@@ -1,73 +1,74 @@
-#+title: Project Milestone 2
-#+author: Team Lithium
+# Project Milestone 2
 
-* Info
+Team Lithium
+
+## Info
 
 For simplicity of setup/build, we are using SQLite, since it works nicely ootb with no setup outside of Python script.
 
-* Setup
+## Setup
 
-** Python Version
+### Python Version
 
 Ensure you are using at minimum python version 3.12.
 
 This is the most widely-adopted of the recent python version. It has some nice features that make writing this code much better.
 
-#+begin_src bash
+``` bash
 python3 --version
-#+end_src
+```
 
-** Dependencies
+### Dependencies
 
 It is recommended that you use a virtual environment before continuing. This project was built using `uv` as it handles most of the annoying project config, but any venv will work.
 
-You can [[https://docs.astral.sh/uv/getting-started/installation/][install uv here]].
+You can [install uv here](https://docs.astral.sh/uv/getting-started/installation/).
 
 To setup a venv with `uv`:
 
-#+begin_src bash
+``` bash
 uv venv
-#+end_src
+```
 
 Remember to activate the venv afterwards using the command it spits back at you. On Linux this is simply:
 
-#+begin_src bash
+``` bash
 source .venv/bin/active
-#+end_src
+```
 
 Install the project requirements:
 
-#+begin_src bash
+``` bash
 uv pip install -r requirements.txt
-#+end_src
+```
 
 And you are ready to go.
 
-* Running the Project
+## Running the Project
 
-** Normal Operation
+### Normal Operation
 
 Start the app with:
 
-#+begin_src bash
+``` bash
 uv run textual run src/app.py
-#+end_src
+```
 
 If the textual command isn't found, just run it as a normal python file (not recommended).
 
-#+begin_src bash
+``` bash
 python3 src/app.py
-#+end_src
+```
 
 It should open up a GUI/TUI in your terminal. To run it in the brower:
 
-#+begin_src bash
+``` bash
 uv run textual serve src/app.py
-#+end_src
+```
 
 and open the corresponding port in your browser.
 
-** Resetting Progress
+### Resetting Progress
 
 To start with a fresh database, run the app and find the settings menu.
 
