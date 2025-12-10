@@ -24,7 +24,8 @@ class LibraryApp(App):
     ]
 
     def on_mount(self) -> None:
-        db.config.set_db_name("library.db")
+        if not db.config.db_name:
+            db.config.set_db_name("library.db")
 
         today = None
         if db.exists(db.config.db_name) and db.is_initialized():
