@@ -132,10 +132,10 @@ class BorrowerDetailModal(BaseModal):
 
         elif event.button.id == 'pay-button':
             if self.borrower_data:
-                success = db.pay_fines(self.borrower_data.id, self.total_fines)
+                result = db.pay_fines(self.borrower_data.id, self.total_fines)
 
-                if success:
-                    self.notify("Fines paid successfully!", severity="information")
+                if result.status:
+                    self.notify(result.message, severity="information")
                     self.dismiss()
                 else:
-                    self.notify("Unable to pay fines.", severity="error")
+                    self.notify(result.message, severity="error")

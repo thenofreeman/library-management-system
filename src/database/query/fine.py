@@ -1,5 +1,5 @@
 from typing import Optional
-from datetime import date, timedelta
+from datetime import date
 
 from models import FineSearchResult
 from database.names import (
@@ -9,10 +9,9 @@ from database.names import (
 )
 
 import database as db
+from models.result import OperationResult
 
 from . import query, metadata
-
-from logger import Logger
 
 def get_all_fines(paid: bool = False) -> list[FineSearchResult]:
     sql = f"""
@@ -87,37 +86,46 @@ def get_fines_last_updated() -> Optional[date]:
 
     return date.fromisoformat(result)
 
-def pay_fines(borrower_id: int, amt: int) -> bool:
+def pay_fines(borrower_id: int, amt: int) -> OperationResult:
     borrower = db.get_borrower_by_id(borrower_id)
 
-    print("start")
-
     if not borrower:
-        Logger.error("Borrower doesn't exist.")
-        return False
-
-    print(borrower)
+        return OperationResult(
+            status=False,
+            message="Borrower doesn't exist."
+        )
 
     total_fines = db.get_total_fines_by_borrower_id(borrower.id)
 
     if amt < total_fines:
-        Logger.error("Borrower didn't pay enough fine.")
-        return False
-
-    print(total_fines)
+        return OperationResult(
+            status=False,
+            message="Borrower didn't pay enough fine."
+        )
 
     fines = db.get_fines_by_borrower_id(borrower.id)
 
     if not fines:
-        return False
+        return OperationResult(
+            status=False,
+            message="No fines attached to borrower."
+        )
 
-    print(fines)
+    isbn_of_fines_with_active_checkouts = [fine.isbn for fine in fines if fine.date_in == None]
+    isbns = ", ".join(isbn_of_fines_with_active_checkouts)
+
+    if isbn_of_fines_with_active_checkouts:
+        return OperationResult(
+            status=False,
+            message=f"Cannot make payment on books that are actively checked out: {isbns}"
+        )
 
     loan_ids = [fine.loan_id for fine in fines]
 
-    print(loan_ids)
-
-    return db.resolve_fines(loan_ids)
+    return OperationResult(
+            status=db.resolve_fines(loan_ids),
+            message="Fines paid successfully!"
+        )
 
 def resolve_fines(loan_ids: list[int]) -> bool:
     sql = f"""
