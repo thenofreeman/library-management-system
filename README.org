@@ -45,48 +45,34 @@ And you are ready to go.
 
 * Running the Project
 
-** First Run
-
-On your first run, you should initialize the database:
-
-#+begin_src bash
-python3 main.py --init
-#+end_src
-
-This creates a database file called ~library.db~, which we will query with sqlite. There is a way to do this from the in-app settings, but this quicker on first run.
-
 ** Normal Operation
 
 Start the app with:
 
 #+begin_src bash
-uv run textual run main.py
-# to run with flags:
-# uv run textual run main.py --init
+uv run textual run src/app.py
 #+end_src
 
 If the textual command isn't found, just run it as a normal python file (not recommended).
 
 #+begin_src bash
-python3 main.py
+python3 src/app.py
 #+end_src
 
 It should open up a GUI/TUI in your terminal. To run it in the brower:
 
 #+begin_src bash
-uv run textual serve main.py
+uv run textual serve src/app.py
 #+end_src
 
 and open the corresponding port in your browser.
 
 ** Resetting Progress
 
-To run the initialization step AND DELETE THE CURRENT DB (eg. to start fresh), pass ~--init -f~ to force initialization. Or, alternatively, do this from the settings menu in-app.
+To start with a fresh database, run the app and find the settings menu.
 
-#+begin_src bash
-python3 main.py --init -f
-#+end_src
+From here you can re-init the database, or optionally pass a new filename and initialize it.
 
-You could also just delete the file and run ~--init~ again, but this way is nicer.
+NOTE: initializing the database loads in all of the given test data that is extracted from the csv files in `/data`.
 
-WARNING: this removes all progress from created borrowers, checkouts, fines, etc. and just starts fresh with the given data.
+WARNING: re-init removes all progress from created borrowers, checkouts, fines, etc. and just starts fresh with the given data.
