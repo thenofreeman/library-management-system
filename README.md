@@ -1,6 +1,4 @@
-# Project Milestone 2
-
-Team Lithium
+# Database Systems Project
 
 ## Info
 
