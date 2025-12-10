@@ -32,10 +32,10 @@ def search_books(search_term: str) -> list[BookSearchResult]:
     LEFT JOIN {AUTHORS_TABLE_NAME} a ON a.Author_id = ba.Author_id
     LEFT JOIN {BOOK_LOANS_TABLE_NAME} l ON b.Isbn = l.Isbn AND l.Date_in IS NULL
     LEFT JOIN {BORROWERS_TABLE_NAME} br ON br.Card_id = l.Card_id
-    WHERE b.Isbn LIKE ? COLLATE NOCASE
-       OR b.Title LIKE ? COLLATE NOCASE
-       OR a.Name LIKE ? COLLATE NOCASE
     GROUP BY b.Isbn
+    HAVING b.Isbn LIKE ? COLLATE NOCASE
+       OR b.Title LIKE ? COLLATE NOCASE
+       OR Author_names LIKE ? COLLATE NOCASE
     """
     params = [f"%{search_term}%" for _ in range(3)]
 
