@@ -8,7 +8,7 @@ from textual.widgets import Button
 from textual.containers import Container, Grid
 
 from ui.components.navbar import NavbarComponent
-from ui.modals import QuitModal, TimeTravelModal, CreateBorrowerModal, SettingsModal
+from ui.modals import QuitModal, TimeTravelModal, CreateBorrowerModal, SettingsModal, InitModal
 from ui.screens import BookSearchScreen, BorrowerSearchScreen
 
 import database as db
@@ -35,6 +35,10 @@ class HomeScreen(Screen):
 
         # Footer (empty for now)
         yield Container(classes="footer")
+
+    def on_mount(self) -> None:
+        if not db.is_initialized():
+            self.app.push_screen(InitModal())
 
     def on_screen_resume(self) -> None:
         self.refresh_data()
