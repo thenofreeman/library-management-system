@@ -209,7 +209,8 @@ def resolve_loan(loan_id: int) -> OperationResult:
         WHERE Loan_id = ?
     """
 
-    date_in = db.get_current_date()
+    today = db.get_current_date() or date.today()
+    date_in = today.isoformat()
 
     params = [date_in, loan_id]
 
