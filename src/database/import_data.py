@@ -3,6 +3,7 @@ import csv
 from typing import Optional
 
 from database.dtypes import CSVData, StringMatrix
+import database as db
 
 def from_csv() -> Optional[CSVData]:
 
@@ -100,6 +101,7 @@ def load_additional_test_data(db_name: str) -> bool:
         
         if not all_isbns:
             conn.close()
+
             return False
         
         loans_data = []
@@ -155,12 +157,18 @@ def load_additional_test_data(db_name: str) -> bool:
         c.executemany(sql, loans_data)
         conn.commit()
         conn.close()
-        
-        return True
-        
+
     except sqlite3.Error as e:
         print(f"Error loading test data: {e}")
         if conn:
             conn.rollback()
             conn.close()
+
         return False
+
+    if not db.get_current_date():
+        db.set_current_date(date.today())
+    
+    db.update_fines()
+
+    return True
