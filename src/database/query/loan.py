@@ -128,7 +128,7 @@ def create_loan(isbn: str, borrower_id: int) -> OperationResult:
     if not borrower:
         return OperationResult(
             status=False,
-            message="Book not found"
+            message="Borrower not found"
         )
 
     checkouts = db.get_loans_by_borrower_id(borrower_id, returned=False)
