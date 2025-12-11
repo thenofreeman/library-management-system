@@ -105,7 +105,7 @@ Many of the components of the application also leverage the usefulness of Pydant
 
 As far as parsing the migrated data, the system assumes it is in csv format and makes opinionated decisions based on what the previous file looks like (either tab-delimited or comma-delimited).
 
-Most notably, the system strips out any HTML encoding and converts it to the proper ascii character (eg &amp; -> &).
+Most notably, the system strips out any HTML encoding and converts it to the proper ascii character (eg & amp; -> &).
 
 Borrower IDs are converted from string IDXXXXXXX representation to pure integers. There is no worry about leading zeros as the data is validated to not have lost any data in this process.
 
