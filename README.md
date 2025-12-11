@@ -27,6 +27,8 @@
 
 ## Info
 
+This following project represents a Library Management System operated by a librarian to handle checking in and out books, and managing borrowers and their associated fines.
+
 ## System Design
 
 For simplicity of setup/build, we are using SQLite, since it works nicely ootb with no setup outside of Python script.
