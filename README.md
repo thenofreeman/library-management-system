@@ -1,5 +1,30 @@
 # Database Systems Project
 
+## Table of Contents
+
+- [Info](#info)
+- [System Design](#system-design)
+  - [Database Design](#database-design)
+  - [Software Design](#software-design)
+  - [Technical Dependencies](#technical-dependencies)
+  - [Handling the Migration Data](#handling-the-migration-data)
+  - [Error Handling, Validation and Execution](#error-handling-validation-and-execution)
+- [Quick Start](#quick-start)
+  - [The Home Page](#the-home-page)
+  - [Search Books](#search-books)
+  - [Search Borrowers](#search-borrowers)
+  - [Create Borrowers](#create-borrowers)
+  - [Settings](#settings)
+  - [Time Travel](#time-travel)
+  - [Quit](#quit)
+- [Setup](#setup)
+  - [Python Version](#python-version)
+  - [Dependencies](#dependencies)
+- [Running the Project](#running-the-project)
+  - [First Run](#first-run)
+  - [Normal Operation](#normal-operation)
+  - [Resetting Progress](#resetting-progress)
+
 ## Info
 
 ## System Design
