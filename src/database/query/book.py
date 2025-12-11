@@ -38,38 +38,36 @@ def search_books(search_term: str, filters: Optional[dict] = None) -> list[BookS
     conditions = []
     params = []
     
-    if filters:
+    if filters and 'columns' in filters:
         # by columns
-        if 'columns' in filters:
-            columns = {
-                'ISBN': 'b.Isbn',
-                'Title': 'b.Title',
-                'Authors': 'Author_names'
-            }
-            
-            for column_name, is_enabled in filters['columns']:
-                if is_enabled and column_name in columns:
-                    conditions.append(f"{columns[column_name]} LIKE ? COLLATE NOCASE")
-                    params.append(f"%{search_term}%")
+        columns = {
+            'ISBN': 'b.Isbn',
+            'Title': 'b.Title',
+            'Authors': 'Author_names'
+        }
+        
+        for column_name, is_enabled in filters['columns']:
+            if is_enabled and column_name in columns:
+                conditions.append(f"{columns[column_name]} LIKE ? COLLATE NOCASE")
+                params.append(f"%{search_term}%")
+    else:
+        conditions = [
+            "b.Isbn LIKE ? COLLATE NOCASE",
+            "b.Title LIKE ? COLLATE NOCASE",
+            "Author_names LIKE ? COLLATE NOCASE"
+        ]
+        params = [f"%{search_term}%" for _ in range(3)]
+    
+    sql += " OR ".join(conditions) + ")"
+    
+    if filters and 'availability' in filters:
+        availability = filters['availability']
+        if availability == 'Available':
+            sql += " AND (CASE WHEN l.Isbn IS NOT NULL THEN 0 ELSE 1 END) = 1"
+        elif availability == 'Unavailable':
+            sql += " AND (CASE WHEN l.Isbn IS NOT NULL THEN 0 ELSE 1 END) = 0"
         else:
-            conditions = [
-                "b.Isbn LIKE ? COLLATE NOCASE",
-                "b.Title LIKE ? COLLATE NOCASE",
-                "Author_names LIKE ? COLLATE NOCASE"
-            ]
-            params = [f"%{search_term}%" for _ in range(3)]
-        
-        sql += " OR ".join(conditions) + ")"
-        
-        # by availability
-        if 'availability' in filters:
-            availability = filters['availability']
-            if availability == 'Available':
-                sql += " AND (CASE WHEN l.Isbn IS NOT NULL THEN 0 ELSE 1 END) = 1"
-            elif availability == 'Unavailable':
-                sql += " AND (CASE WHEN l.Isbn IS NOT NULL THEN 0 ELSE 1 END) = 0"
-            else:
-                pass # no filter
+            pass # no filter
     
     results = query.get_all_or_none(sql, params)
 
