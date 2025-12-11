@@ -8,7 +8,7 @@ For simplicity of setup/build, we are using SQLite, since it works nicely ootb w
 
 ## Quick Start
 
-This section explains how to operate the project. See [Setup](#Setup) and [Running the Project](#Running the Project) for how to build and run the application for the first time.
+This section explains how to operate the project. See [Setup](#Setup) and [Running the Project](#Running-the-Project) for how to build and run the application for the first time.
 
 ### The Home Page
 
