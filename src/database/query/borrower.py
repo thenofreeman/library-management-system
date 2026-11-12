@@ -13,7 +13,6 @@ from models.result import OperationResult
 
 from . import query
 
-from logger import Logger
 
 def search_borrowers(search_term: str) -> list[BorrowerSearchResult]:
     if not search_term:
@@ -54,27 +53,25 @@ def search_borrowers(search_term: str) -> list[BorrowerSearchResult]:
 
     return [BorrowerSearchResult(**dict(result)) for result in results]
 
+_SELECT_BORROWER_BY_SSN = """
+    SELECT b.Card_id, b.Ssn, b.Bname, b.Address, b.Phone
+    FROM BORROWER b
+    WHERE b.Ssn = ?
+"""
+
+_SELECT_BORROWER_BY_ID = """
+    SELECT b.Card_id, b.Ssn, b.Bname, b.Address, b.Phone
+    FROM BORROWER b
+    WHERE b.Card_id = ?
+"""
+
 def get_borrower_by_ssn(ssn: str) -> Optional[Borrower]:
-    return _get_borrower("Ssn", ssn)
+    return _get_borrower(_SELECT_BORROWER_BY_SSN, ssn)
 
 def get_borrower_by_id(borrower_id: int) -> Optional[Borrower]:
-    return _get_borrower("Card_id", str(borrower_id))
+    return _get_borrower(_SELECT_BORROWER_BY_ID, str(borrower_id))
 
-def _get_borrower(column: str, param: str) -> Optional[Borrower]:
-    if column == 'Card_id':
-        column = 'b.Card_id'
-
-    sql = f"""
-    SELECT
-        b.Card_id,
-        b.Ssn,
-        b.Bname,
-        b.Address,
-        b.Phone
-    FROM {BORROWERS_TABLE_NAME} b
-    WHERE {column} = ?
-    """
-
+def _get_borrower(sql: str, param: str) -> Optional[Borrower]:
     result = query.get_one_or_none(sql, [param])
 
     if not result:
@@ -82,13 +79,18 @@ def _get_borrower(column: str, param: str) -> Optional[Borrower]:
 
     return Borrower(**dict(result))
 
+
 def create_borrower(name: str, ssn: str, address: str, phone: str) -> OperationResult:
     if not (name and ssn and address and phone):
         missing_fields = []
-        if not name: missing_fields.append("Name")
-        if not ssn: missing_fields.append("SSN")
-        if not address: missing_fields.append("Address")
-        if not phone: missing_fields.append("Phone")
+        if not name:
+            missing_fields.append("Name")
+        if not ssn:
+            missing_fields.append("SSN")
+        if not address:
+            missing_fields.append("Address")
+        if not phone:
+            missing_fields.append("Phone")
 
         return OperationResult(
             status=False,
@@ -130,7 +132,9 @@ def create_borrower(name: str, ssn: str, address: str, phone: str) -> OperationR
 
     params = [name, ssn, address, phone]
 
+    succeeded = query.try_execute_one(sql, params)
+
     return OperationResult(
-        status=query.try_execute_one(sql, params),
-        message="Borrower created successfuly!"
+        status=succeeded,
+        message="Borrower created successfully!" if succeeded else "Could not save the borrower."
     )

@@ -1,7 +1,8 @@
 from typing import Optional
 from datetime import date
 
-from models import FineSearchResult
+from models import FineSearchResult #imported
+from fine_rules import calculate_fine_cents
 from database.names import (
     FINES_TABLE_NAME,
     BOOK_LOANS_TABLE_NAME,
@@ -111,7 +112,7 @@ def pay_fines(borrower_id: int, amt: int) -> OperationResult:
             message="No fines attached to borrower."
         )
 
-    isbn_of_fines_with_active_checkouts = [fine.isbn for fine in fines if fine.date_in == None]
+    isbn_of_fines_with_active_checkouts = [fine.isbn for fine in fines if fine.date_in is None]
     isbns = ", ".join(isbn_of_fines_with_active_checkouts)
 
     if isbn_of_fines_with_active_checkouts:
@@ -159,12 +160,10 @@ def update_fines() -> bool:
     fines_to_update = []
 
     for loan in overdue_loans:
-        loan_id = loan.id
-        days_overdue = (today - loan.due_date).days
+          
+        fine_amt = calculate_fine_cents(loan.due_date, today)
 
-        fine_amt = days_overdue * 25
-
-        fines_to_update.append((loan_id, fine_amt))
+        fines_to_update.append((loan.id, fine_amt))
 
     success = db.set_fines(fines_to_update)
 

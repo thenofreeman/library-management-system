@@ -1,4 +1,5 @@
-from typing import Callable, Any, Optional
+from typing import Any, Optional
+from collections.abc import Callable
 
 from textual import on
 from textual.app import ComposeResult
@@ -55,8 +56,8 @@ class SearchScreen(Screen):
             yield Static("", id="result-count")
 
     def on_mount(self) -> None:
-        input = self.query_one(Input)
-        input.focus()
+        input_box = self.query_one(Input)
+        input_box.focus()
 
         table = self.query_one(DataTable)
 
@@ -103,7 +104,7 @@ class SearchScreen(Screen):
 
         self.result_lookup = {}
         for row_data in self.results:
-            row_key = table.add_row(*row_data.model_dump().values(), key=self.get_key(row_data))
+            table.add_row(*row_data.model_dump().values(), key=self.get_key(row_data))
             self.result_lookup[self.get_key(row_data)] = row_data
 
         self.update_result_count()
@@ -114,9 +115,9 @@ class SearchScreen(Screen):
 
         self.filters = filters
 
-        input = self.query_one(Input)
-        if input.value:
-            self.handle_search(input.value)
+        input_box = self.query_one(Input)
+        if input_box.value:
+            self.handle_search(input_box.value)
         else:
             self.update_result_count()
 
